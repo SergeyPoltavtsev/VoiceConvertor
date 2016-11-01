@@ -4,5 +4,5 @@
 
 TestFolder/*
 Data/*
-.DS_Store banished!
+.DS_Store
 .ipynb_checkpoints
