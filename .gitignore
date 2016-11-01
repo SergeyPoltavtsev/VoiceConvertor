@@ -1,0 +1,7 @@
+*.swp
+*.pyc
+.env/*
+
+TestFolder/*
+Data/*
+.DS_Store                                                                                    .ipynb_checkpoints/*
