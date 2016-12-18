@@ -3,6 +3,28 @@ from sound_utils import get_wav_info
 import math as math
 from PIL import Image
 
+def InvertSpectrogram(spectrogram, window_size=256, frame_step=64):
+    _fftSize, _frameCount = spectrogram.shape
+    windowSize = math.floor(_fftSize/2);
+    waveSize = (_frameCount - 1) * frame_step + window_size
+    waveform = np.zeros(waveSize);
+    # To sum up total windowing effect
+    totalWindowingSum = np.zeros(waveSize);
+    h = 0.54 - 0.46*np.cos(2*math.pi* np.arange(window_size)/(window_size-1))
+    fftB = int(math.floor(window_size/2))
+    fftE = int(fftB + window_size)
+    for frameNumber in range(0,_frameCount):
+        waveB = (frameNumber)*frame_step
+        waveE = waveB + window_size
+        spectralSlice = spectrogram[:, frameNumber]
+        newFrame = np.fft.ifft(spectralSlice);
+        newFrame = np.real(np.fft.ifft(spectralSlice));
+        waveform[waveB:waveE] = waveform[waveB:waveE] + newFrame[fftB:fftE]
+        totalWindowingSum[waveB:waveE] = totalWindowingSum[waveB:waveE] + h;
+    waveform = np.divide(np.real(waveform),totalWindowingSum);
+    return waveform
+    
+
 class Spectrogram(object):
     """
     The class for spectrogram and manipulation with it
@@ -78,7 +100,7 @@ class Spectrogram(object):
 
         magSpec = np.sqrt(powerSpec);
         return magSpec, freqs, times
-    
+
     def _normalize(self):
         """
         Normalizes the spectrogram values to the range [0,1]

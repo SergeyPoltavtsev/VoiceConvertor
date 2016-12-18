@@ -1,6 +1,7 @@
 import os
 import wave
 import pylab
+import struct
 from folder_utils import get_speaker_name
 
 # It is used only for flac to wav convertion
@@ -156,3 +157,24 @@ def get_wav_info(file_path):
    
     wav.close()
     return frames, frame_rate
+
+def save_to_wav(file_path, waveform, frame_rate=16000, byte_depth=2, nchannels = 1, compname = "not compressed", comptype = "NONE"):
+    """
+    Writes an array to wav file
+    
+    Inputs:
+    - file_path: A path to a file
+    """
+    wav_file = wave.open(file_path, "w")
+    wav_file.setparams((nchannels, byte_depth, frame_rate, waveform.size,
+    comptype, compname))
+    
+    bit_depth = byte_depth * 8
+    max_nb_bit = float(2**(bit_depth-1))  
+    
+    waveform = waveform * (max_nb_bit + 1.0) 
+    
+    for s in waveform:
+        wav_file.writeframes(struct.pack('h', int(s)))
+        
+    wav_file.close()
