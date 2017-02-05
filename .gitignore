@@ -1,8 +1,10 @@
 *.swp
 *.pyc
+*.tfrecords
 .env/*
 
 TestFolder/*
 Data/*
 .DS_Store
 .ipynb_checkpoints
+.idea

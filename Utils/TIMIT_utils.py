@@ -8,10 +8,10 @@ def parse_phoneme_file(path):
     Returns:
     A list of corteges of pattern (starting_frame, ending_frame, phoneme)
     """
-    #convert extention to open phonemes file
+    # convert extension to open phonemes file
     if not path.endswith(".PHN"):
         path = path.split('.')[0] + ".PHN"
-        
+
     phonemes = []
     with open(path) as f:
         lines = f.readlines()

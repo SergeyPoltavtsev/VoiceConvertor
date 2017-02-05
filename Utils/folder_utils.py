@@ -1,5 +1,6 @@
 import os
 
+
 def reverse_folder(ROOT, extention):
     """
     Reverces a directory in depth and outputs all files with specified extention
@@ -13,7 +14,7 @@ def reverse_folder(ROOT, extention):
     paths = []
     for dr in os.listdir(ROOT):
         next_file = ROOT + "/" + dr
-        
+
         if os.path.isdir(next_file):
             ps = reverse_folder(next_file, extention)
             paths.extend(ps)
@@ -21,7 +22,8 @@ def reverse_folder(ROOT, extention):
             if next_file.endswith(extention):
                 paths.append(next_file)
     return paths
-                
+
+
 def clean_folder(ROOT):
     """
     Deletes all files in a specified folder. Does not 
@@ -34,11 +36,12 @@ def clean_folder(ROOT):
         try:
             if os.path.isfile(file_path):
                 os.remove(file_path)
-        #elif os.path.isdir(file_path): shutil.rmtree(file_path)
+        # elif os.path.isdir(file_path): shutil.rmtree(file_path)
         except Exception as e:
             print(e)
-            
-def get_speaker_name(file_path, position = 2):
+
+
+def get_speaker_name(file_path, position=2):
     """
     Gets speaker name from a file path. Because the only way to get a speaker name is from foldername 
     this solution is very specific and not scalable at all. 
