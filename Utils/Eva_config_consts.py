@@ -2,9 +2,10 @@
 For creating a spectrograms the window of size WINDOW_SIZE is used.
 One spectrum is created out of this window. Afterwards, the window is shifted
 by FRAME_STEP to create the next spectrum.
+NOTE: 75% of overlap has shown the best performance in reconstruction.
 """
 WINDOW_SIZE = 256
-WINDOW_STEP = 128
+WINDOW_STEP = 64
 
 """
 For positive and negative frequences

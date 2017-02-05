@@ -24,7 +24,8 @@ def InvertSpectrogram(spectrogram, window_size, window_step):
         waveB = frameNumber * window_step
         waveE = waveB + window_size
         spectralSlice = spectrogram[:, frameNumber]
-        newFrame = np.real(np.fft.ifft(spectralSlice))
+        newFrame = np.fft.ifft(spectralSlice)
+        newFrame = np.real(np.fft.fftshift(newFrame))
         waveform[waveB:waveE] = waveform[waveB:waveE] + newFrame[fftB:fftE]
         totalWindowingSum[waveB:waveE] = totalWindowingSum[waveB:waveE] + h
     waveform = np.divide(np.real(waveform), totalWindowingSum)
