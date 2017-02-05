@@ -8,7 +8,7 @@ name_separator = "_"
 name_counter = 0
 
 
-def cutIntoChunks(file_path, output_folder, chunk_duration=0.02, chunk_step=0.02, chunk_extention=".wav"):
+def cutIntoChunks(file_path, output_folder, chunk_duration=0.02, chunk_step=0.02, chunk_extension=".wav"):
     """
     Divides a sound file into chunks using time intervals
 
@@ -16,7 +16,7 @@ def cutIntoChunks(file_path, output_folder, chunk_duration=0.02, chunk_step=0.02
     :param output_folder: output folder where chunks will be saved
     :param chunk_duration: chunk duration where 0.02 = 20ms
     :param chunk_step: the step between chunks where default 0.02 = 20ms
-    :param chunk_extention: chunk extention
+    :param chunk_extension: chunk extension
     """
 
     wav = wave.open(file_path, 'r')
@@ -24,19 +24,16 @@ def cutIntoChunks(file_path, output_folder, chunk_duration=0.02, chunk_step=0.02
     frame_rate = wav.getframerate()
     number_channels = wav.getnchannels()
     sample_width = wav.getsampwidth()
-
-    numSamplesPerChunk = int(chunk_duration * frame_rate);
-    numSamplesPerStep = int(chunk_step * frame_rate);
-
-    totalNumSamples = wav.getnframes();
-
-    chunk_counter = 0;
-    starting_location = 0;
+    numSamplesPerChunk = int(chunk_duration * frame_rate)
+    numSamplesPerStep = int(chunk_step * frame_rate)
+    totalNumSamples = wav.getnframes()
+    chunk_counter = 0
+    starting_location = 0
 
     while starting_location + numSamplesPerChunk <= totalNumSamples:
         ending_location = min(starting_location + numSamplesPerChunk - 1, totalNumSamples)
         wav.setpos(starting_location)
-        chunk_file_name = str(chunk_counter) + chunk_extention
+        chunk_file_name = str(chunk_counter) + chunk_extension
         output_chunk_path = os.path.join(output_folder, chunk_file_name)
 
         _cutOneChunk(starting_location, ending_location, wav, output_chunk_path, frame_rate, number_channels,
@@ -57,6 +54,7 @@ def cutPhonemeChunk(file_path, output_folder, starting_frame, ending_frame, phon
     :param starting_frame: starting frame
     :param ending_frame: ending frame
     :param phoneme: A phoneme which is associated with the cut chunk
+    :return: A path to cut and saved chunk
     """
 
     global name_counter
@@ -75,9 +73,7 @@ def cutPhonemeChunk(file_path, output_folder, starting_frame, ending_frame, phon
         # file with name name_candidate already exists therefore the name should be changed
         name_candidate = name_candidate + name_separator + str(name_counter) + extension
         output_file = os.path.join(speaker_folder, name_candidate)
-        name_counter = name_counter + 1
-
-        # print output_file
+        name_counter += 1
 
     wav = wave.open(file_path, 'r')
 
@@ -155,10 +151,8 @@ def save_to_wav(file_path, waveform, frame_rate=16000, byte_depth=2, nchannels=1
     wav_file = wave.open(file_path, "w")
     wav_file.setparams((nchannels, byte_depth, frame_rate, waveform.size,
                         comptype, compname))
-
     bit_depth = byte_depth * 8
     max_nb_bit = float(2 ** (bit_depth - 1))
-
     waveform = waveform * (max_nb_bit + 1.0)
 
     for s in waveform:

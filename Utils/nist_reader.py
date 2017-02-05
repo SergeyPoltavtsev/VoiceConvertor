@@ -8,25 +8,25 @@ class NistReader(object):
     More info about Nist files can be found here: http://www.ee.columbia.edu/ln/LabROSA/doc/HTKBook21/node64.html
     """
 
-    def __init__(self, sample_rate=16000, sample_n_bytes=2, n_channels=1, nist_extention=".WAV"):
+    def __init__(self, sample_rate=16000, sample_n_bytes=2, n_channels=1, nist_extension=".WAV"):
         """
         Initialize the reader.
 
         :param sample_rate: Sample rate in Hz. A number of samples in one second
         :param sample_n_bytes: A number of bytes per each sample
         :param n_channels: Number of channels (1 = mono, 2 = stereo)
-        :param nist_extention: A Nist file extention
+        :param nist_extension: A Nist file extension
         """
 
         self.sample_rate = sample_rate
         self.sample_n_bytes = sample_n_bytes
         self.n_channels = n_channels
-        self.wav_extention = ".wav"
-        self.nist_extention = nist_extention
+        self.wav_extension = ".wav"
+        self.nist_extension = nist_extension
 
     def __separateNistOnHeaderAndData(self, input_file):
         """
-        Separetes Nist file header and raw data.
+        Separates Nist file header and raw data.
         The header begins with a label of the form NISTxx where xx is a version
         code followed by the number of bytes in the header.
         The header also contain the following information:
@@ -43,20 +43,20 @@ class NistReader(object):
         """
 
         # TODO: parce header to get all values
-        with open(input_file, 'rb') as nistfile:
-            Nist_version = nistfile.readline()
-            HeaderBytes = int(nistfile.readline())
+        with open(input_file, 'rb') as nistFile:
+            Nist_version = nistFile.readline()
+            HeaderBytes = int(nistFile.readline())
             # closing file. Now we know header size
 
-        with open(input_file, 'rb') as nistfile:
-            header = nistfile.read(HeaderBytes)
-            data = nistfile.read()
+        with open(input_file, 'rb') as nistFile:
+            header = nistFile.read(HeaderBytes)
+            data = nistFile.read()
 
         return header, data
 
     def Nist2Wav(self, input_file, output_folder):
         """
-        Converts a Nist file to a wav file. A nist file has an extention of type ".WAV"
+        Converts a Nist file to a wav file. A nist file has an extension of type ".WAV"
         The converter uses predefined sound parameters. The proper way to do it is to read them from the header
 
         :param input_file: a path to a Nist file
@@ -68,15 +68,14 @@ class NistReader(object):
         output_folder = output_folder + "/"
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
-
         file_name = os.path.basename(input_file)
+
         # the converted file will be saved with the same name but with the different extension
-        wav_name = file_name.replace(self.nist_extention, self.wav_extention)
+        wav_name = file_name.replace(self.nist_extension, self.wav_extension)
         wav_file = output_folder + wav_name
-
         header, data = self.__separateNistOnHeaderAndData(input_file)
-
         wavfile = wave.open(wav_file, 'wb')
+
         # nchannels, sampwidth, framerate, nframes, comptype, compname
         wavfile.setparams((self.n_channels, self.sample_n_bytes, self.sample_rate, 0, 'NONE', 'NONE'))
         wavfile.writeframes(data)

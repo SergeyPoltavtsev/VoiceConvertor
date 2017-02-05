@@ -4,31 +4,14 @@ import numpy as np
 import os
 
 
-# import argparse
-# from models import VGG16
-
-# Not needed
-# mean = np.array([103.939, 116.779, 123.68], dtype=np.float32)
-# def add_mean(img):
-#     for i in range(3):
-#         img[0,:,:,i] += mean[i]
-#     return img
-
-# def sub_mean(img):
-#     for i in range(3):
-#         img[0,:,:,i] -= mean[i]
-#     return img
-
 def read_image(path):
     """
-    Reads and processes an image from a specified path
-    
-    Inputs:
-    - path: A path to an image
-    
-    Returns: 
-    3-D matrix of RGB values
+    Reads and processes an image from a specified path.
+
+    :param path: A path to an image
+    :return: 3-D matrix of RGB values
     """
+
     img = imread(path, mode='RGB')
     # Resize if ratio is specified
     img = imresize(img, (224, 224))
@@ -36,20 +19,37 @@ def read_image(path):
     return img
 
 
-def process_image(arr):
-    arr = arr.astype(np.float32)
-    arr = arr[None, ...]
+def process_image(img):
+    """
+    Image preprocessing which depends on the task.
+    Casts to the float32 and adds one more dimension.
+
+    :param img: An image to process
+    :return: Processed image
+    """
+
+    img = img.astype(np.float32)
+    img = img[None, ...]
     # Subtract the image mean
-    # arr = sub_mean(arr)
-    return arr
+    # img = sub_mean(img)
+    return img
 
 
-def save_image(im, iteration, out_dir):
-    img = im.copy()
+def save_image(image, iteration, out_dir):
+    """
+    Saves an image to the disk
+
+    :param image: An image to save
+    :param iteration: Iteration number
+    :param out_dir: output directory
+    :return:
+    """
+
+    img = image.copy()
     # Add the image mean
     # img = add_mean(img)
     img = np.clip(img[0, ...], 0, 255).astype(np.uint8)
-    nowtime = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+    now = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
-    imsave("{}/neural_art_{}_iteration{}.png".format(out_dir, nowtime, iteration), img)
+    imsave("{}/neural_art_{}_iteration{}.png".format(out_dir, now, iteration), img)
