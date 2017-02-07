@@ -39,11 +39,11 @@ The size of a chunk
 CHUNK_SIZE = (SPECTROGRAM_HEIGHT, SPECTROGRAM_CHUNK_LENGTH, SPECTROGRAM_DEPTH)
 
 ####### PATHES #########
-
 """
-Dataset file
+Path to the dataset file
 """
-DATESET_FILE = "TimitStore.tfrecords"
+#DATESET_FILE_PATH = "TimitStore.tfrecords"
+DATESET_FILE_PATH = "/Volumes/BOOTCAMP/EVA/TimitStore.tfrecords"
 
 """
 Path to train TIMIT date set
