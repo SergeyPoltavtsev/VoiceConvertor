@@ -8,6 +8,19 @@ WINDOW_SIZE = 256
 WINDOW_STEP = 64
 
 """
+Full list of TIMIT phonemes
+"""
+TOTAL_TIMIT_PHONEME_LIST = ['iy', 'ih', 'eh', 'ey', 'ae', 'aa', 'aw', 'ay', 'ah', 'ao', 'oy', 'ow', 'uh', 'uw', 'ux',
+                            'er', 'ax', 'ix', 'axr', 'ax-h', 'jh', 'ch', 'b', 'd', 'g', 'p', 't', 'k', 'dx', 's', 'sh',
+                            'z', 'zh', 'f', 'th', 'v', 'dh', 'm', 'n', 'ng', 'em', 'nx', 'en', 'eng', 'l', 'r', 'w',
+                            'y', 'hh', 'hv', 'el', 'bcl', 'dcl', 'gcl', 'pcl', 'tcl', 'kcl', 'q', 'pau', 'epi', 'h#']
+
+"""
+Number of phoneme classes
+"""
+NUM_PHONOME_CLASSES = len(TOTAL_TIMIT_PHONEME_LIST)
+
+"""
 For positive and negative frequences
 """
 SPECTROGRAM_HEIGHT = 2 * WINDOW_SIZE
@@ -36,7 +49,16 @@ CHUNK_VECTOR_SIZE = SPECTROGRAM_HEIGHT * SPECTROGRAM_CHUNK_LENGTH * SPECTROGRAM_
 """
 The size of a chunk
 """
-CHUNK_SIZE = (SPECTROGRAM_HEIGHT, SPECTROGRAM_CHUNK_LENGTH, SPECTROGRAM_DEPTH)
+CHUNK_SHAPE = (SPECTROGRAM_HEIGHT, SPECTROGRAM_CHUNK_LENGTH, SPECTROGRAM_DEPTH)
+TF_CHUNK_SHAPE = [SPECTROGRAM_HEIGHT, SPECTROGRAM_CHUNK_LENGTH, SPECTROGRAM_DEPTH]
+
+####### TRAIN PARAMETERS #########
+"""
+Batch size
+"""
+BATCH_SIZE = 128
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 50000
+NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000
 
 ####### PATHES #########
 """

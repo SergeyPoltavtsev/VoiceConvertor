@@ -21,7 +21,7 @@ class AbstractStorage(object):
         """
         raise NotImplementedError("Should have implemented this")
 
-    def NextBatch(self):
+    def Inputs(self):
         """
         Method return the next mini batch from the dataset.
         """
