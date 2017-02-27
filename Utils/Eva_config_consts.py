@@ -50,7 +50,6 @@ CHUNK_VECTOR_SIZE = SPECTROGRAM_HEIGHT * SPECTROGRAM_CHUNK_LENGTH * SPECTROGRAM_
 The size of a chunk
 """
 CHUNK_SHAPE = (SPECTROGRAM_HEIGHT, SPECTROGRAM_CHUNK_LENGTH, SPECTROGRAM_DEPTH)
-TF_CHUNK_SHAPE = [SPECTROGRAM_HEIGHT, SPECTROGRAM_CHUNK_LENGTH, SPECTROGRAM_DEPTH]
 
 ####### TRAIN PARAMETERS #########
 """
@@ -66,6 +65,11 @@ Path to the dataset file
 """
 #DATESET_FILE_PATH = "TimitStore.tfrecords"
 DATESET_FILE_PATH = "/Volumes/BOOTCAMP/EVA/TimitStore.tfrecords"
+
+"""
+Path to the dataset file for tests
+"""
+TEST_DATESET_FILE_PATH = "Test_TimitStore.tfrecords"
 
 """
 Path to train TIMIT date set
