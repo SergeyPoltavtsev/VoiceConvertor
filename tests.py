@@ -29,9 +29,11 @@ class EvaTest(tf.test.TestCase):
         with self.test_session() as sess, TFStorage(filename, TFStorageOpenOptions.READ) as storage:
             spectrum, phoneme, speaker = storage._read_one_example()
             spectrum = tf.reshape(spectrum, config.CHUNK_SHAPE)
-            # Required. See below for explanation
+            # Initializing all variables
             init = tf.global_variables_initializer()
             sess.run(init)
+            # Starting threads that run the input pipeline, filling the example queue
+            # so that the dequeue to get the examples will succeed
             tf.train.start_queue_runners(sess=sess)
 
             retrieved_spectrogram, retrieved_phoneme, retrieved_speaker = sess.run([spectrum, phoneme, speaker])

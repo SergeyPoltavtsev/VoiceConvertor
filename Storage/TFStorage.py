@@ -21,6 +21,20 @@ class TFStorageLabelOption(Enum):
     SPEAKER = 2
 
 
+def get_total_number_of_rows(path):
+    """
+    Counts total number of examples in a .tfrecords file
+
+    :param path: path to a .tfrecords file
+    :return: total number of examples
+    """
+
+    total_number = 0
+    for record in tf.python_io.tf_record_iterator(path):
+        total_number += 1
+    return total_number
+
+
 class TFStorage(object):
     """
     The Storage based on TFRecords
@@ -71,7 +85,7 @@ class TFStorage(object):
             'height': _int64_feature(config.SPECTROGRAM_HEIGHT),
             'width': _int64_feature(config.SPECTROGRAM_CHUNK_LENGTH),
             'depth': _int64_feature(config.SPECTROGRAM_DEPTH),
-            'phoneme': _bytes_feature(phoneme),
+            'phoneme': _int64_feature(phoneme),
             'speaker': _bytes_feature(speaker),
             'spectrum_raw': _bytes_feature(spectrum_raw)}))
 
@@ -82,14 +96,17 @@ class TFStorage(object):
         """
         Reads one example (one row) from a storage.
 
-        :return: spectrum vector, phoneme and speaker
+        :return:
+            spectrogram vector: a vector of spectrogram data of size config.CHUNK_SHAPE
+            phoneme: phoneme
+            speaker: speaker
         """
         _, serialized_example = self.reader.read(self.filename_queue)
 
         features = tf.parse_single_example(
             serialized_example,
             features={
-                'phoneme': tf.FixedLenFeature([], tf.string),
+                'phoneme': tf.FixedLenFeature([], tf.int64),
                 'speaker': tf.FixedLenFeature([], tf.string),
                 'spectrum_raw': tf.FixedLenFeature([], tf.string),
             })
@@ -100,7 +117,7 @@ class TFStorage(object):
         spectrum.set_shape([config.CHUNK_VECTOR_SIZE])
 
         # Convert phoneme and speaker bytes(uint8) to string.
-        phoneme = tf.cast(features['phoneme'], tf.string)
+        phoneme = tf.cast(features['phoneme'], tf.int64)
         speaker = tf.cast(features['speaker'], tf.string)
         tf.reshape(spectrum, config.CHUNK_SHAPE)
 
@@ -129,14 +146,15 @@ class TFStorage(object):
             label = speaker
 
         # Ensure that the random shuffling has good mixing properties.
-        min_fraction_of_examples_in_queue = 0.4
-        min_queue_examples = int(config.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN *
-                                 min_fraction_of_examples_in_queue)
+        #min_fraction_of_examples_in_queue = 0.4
+        #min_queue_examples = int(config.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN *
+        #                         min_fraction_of_examples_in_queue)
+        min_queue_examples = 10000
 
         # Generate a batch of images and labels by building up a queue of examples.
         return self._generate_image_and_label_batch(spectrogram, label,
                                                     min_queue_examples, batch_size,
-                                                    shuffle=False)
+                                                    shuffle=True)
 
     def _generate_image_and_label_batch(self, spectrogram, label, min_queue_examples, batch_size, shuffle):
         """Construct a queued batch of spectrograms and labels.
