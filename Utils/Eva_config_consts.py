@@ -61,23 +61,34 @@ NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000
 
 ####### PATHES #########
 """
+Determines if it is local of server
+"""
+IS_LOCAL = True;
+
+"""
 Path to the dataset file
 """
-#DATESET_FILE_PATH = "TimitStore.tfrecords"
-DATESET_FILE_PATH = "/Volumes/BOOTCAMP/EVA/TimitStore.tfrecords"
+#DATESET_FILE_NAME = "TimitStore.tfrecords"
+DATESET_FILE_PATH_LOCAL = "/Volumes/BOOTCAMP/EVA/TimitStore.tfrecords"
+DATESET_FILE_PATH_SERVER = "/User"
+def DATESET_FILE_PATH():
+     return DATESET_FILE_PATH_LOCAL if IS_LOCAL else DATESET_FILE_PATH_SERVER
 
 """
 Path to the dataset file for tests
 """
-TEST_DATESET_FILE_PATH = "Test_TimitStore.tfrecords"
+TEST_DATESET_FILE_PATH_SERVER = "Test_TimitStore.tfrecords"
+TEST_DATESET_FILE_PATH_LOCAL = "Test_TimitStore.tfrecords"
+def TEST_DATESET_FILE_PATH():
+    return TEST_DATESET_FILE_PATH_LOCAL if IS_LOCAL else TEST_DATESET_FILE_PATH_SERVER
 
 """
-Path to train TIMIT date set
+Path to the train TIMIT data set
 """
 PATH_TO_TIMIT_TRAIN = "Data/TIMIT/timit/train"
 
 """
-Path to test TIMIT date set
+Path to the test TIMIT data set
 """
 PATH_TO_TIMIT_TEST = "Data/TIMIT/timit/test"
 

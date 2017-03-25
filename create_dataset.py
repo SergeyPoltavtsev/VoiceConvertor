@@ -61,7 +61,7 @@ def create_dataset(path_to_TIMIT):
     # create a list of paths to WAV files inside path_to_TIMIT
     paths = folder_utils.reverse_folder(path_to_TIMIT, ".WAV")
 
-    with TFStorage(config.DATESET_FILE_PATH, TFStorageOpenOptions.WRITE) as storage:
+    with TFStorage(config.DATESET_FILE_PATH(), TFStorageOpenOptions.WRITE) as storage:
         for path in paths:
             print path
             phonemes = TIMIT_utils.parse_phoneme_file(path)

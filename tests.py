@@ -19,7 +19,7 @@ class EvaTest(tf.test.TestCase):
     def testInsertionAndRetrievingDataFromStorage(self):
         row = self._generate_row()
 
-        filename = config.TEST_DATESET_FILE_PATH
+        filename = config.TEST_DATESET_FILE_PATH()
 
         # write a row
         with TFStorage(filename, TFStorageOpenOptions.WRITE) as storage:
