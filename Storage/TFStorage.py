@@ -32,6 +32,8 @@ def get_total_number_of_rows(path):
     total_number = 0
     for record in tf.python_io.tf_record_iterator(path):
         total_number += 1
+        if total_number % 10000 == 0:
+            print total_number
     return total_number
 
 
