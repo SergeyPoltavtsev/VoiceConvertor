@@ -56,31 +56,32 @@ CHUNK_SHAPE = (SPECTROGRAM_HEIGHT, SPECTROGRAM_CHUNK_LENGTH, SPECTROGRAM_DEPTH)
 Batch size
 """
 BATCH_SIZE = 128
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 231773
-NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 200000
+NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 20000
 
 ####### PATHES #########
 """
 Determines if it is local of server
 """
-IS_LOCAL = True;
+IS_LOCAL = False;
 
 """
 Path to the dataset file
 """
-#DATESET_FILE_NAME = "TimitStore.tfrecords"
-DATESET_FILE_PATH_LOCAL = "/Volumes/BOOTCAMP/EVA/TimitStore.tfrecords"
-DATESET_FILE_PATH_SERVER = "/User"
+DATESET_FILE_NAME = "TimitStore.tfrecords"
+DATESET_FILE_PATH_LOCAL = "/Volumes/BOOTCAMP/EVA/"
+DATESET_FILE_PATH_SERVER = "/home/architector/VoiceConvertor/"
 def DATESET_FILE_PATH():
-     return DATESET_FILE_PATH_LOCAL if IS_LOCAL else DATESET_FILE_PATH_SERVER
+    folder = DATESET_FILE_PATH_LOCAL if IS_LOCAL else DATESET_FILE_PATH_SERVER
+    return folder + DATESET_FILE_NAME
 
 """
 Path to the dataset file for tests
 """
 TEST_DATESET_FILE_PATH_SERVER = "Test_TimitStore.tfrecords"
-TEST_DATESET_FILE_PATH_LOCAL = "Test_TimitStore.tfrecords"
 def TEST_DATESET_FILE_PATH():
-    return TEST_DATESET_FILE_PATH_LOCAL if IS_LOCAL else TEST_DATESET_FILE_PATH_SERVER
+    folder = DATESET_FILE_PATH_LOCAL if IS_LOCAL else DATESET_FILE_PATH_SERVER
+    return folder + TEST_DATESET_FILE_PATH_SERVER
 
 """
 Path to the train TIMIT data set

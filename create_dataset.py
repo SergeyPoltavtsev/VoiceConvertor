@@ -54,14 +54,15 @@ def CutPhonemeIntoChunksAndSave(storage, phoneme_spectrums, chunkLength, phoneme
         GLOBAL_EXAMPLES_COUNTER += 1
 
 
-def create_dataset(path_to_TIMIT):
+def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
+    global GLOBAL_EXAMPLES_COUNTER
     nistReader = NistReader()
     spectrogramFactory = SpectrogramFactory(window_size=config.WINDOW_SIZE, window_step=config.WINDOW_STEP)
 
     # create a list of paths to WAV files inside path_to_TIMIT
     paths = folder_utils.reverse_folder(path_to_TIMIT, ".WAV")
 
-    with TFStorage(config.DATESET_FILE_PATH(), TFStorageOpenOptions.WRITE) as storage:
+    with TFStorage(storage_path, TFStorageOpenOptions.WRITE) as storage:
         for path in paths:
             print path
             phonemes = TIMIT_utils.parse_phoneme_file(path)
@@ -89,6 +90,9 @@ def create_dataset(path_to_TIMIT):
                 phoneme_spectrogram = spectrogramFactory.create_spectrogram(phone_file)
                 CutPhonemeIntoChunksAndSave(storage, phoneme_spectrogram.spectrogram_values,
                                             config.SPECTROGRAM_CHUNK_LENGTH, phoneme[2], speaker)
+                if(number_of_examples==GLOBAL_EXAMPLES_COUNTER):
+                    print "Created: " + GLOBAL_EXAMPLES_COUNTER + " examples"
+                    return
 
 
 if __name__ == '__main__':
@@ -97,5 +101,7 @@ if __name__ == '__main__':
 
     # path to one dr1 folder
     path_to_TIMIT_subset = os.path.join(config.PATH_TO_TIMIT_TRAIN, "dr1")
-    create_dataset(path_to_TIMIT_subset)
+    storage_path = config.DATESET_FILE_PATH()
+    number_of_examples = config.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
+    create_dataset(path_to_TIMIT_subset, storage_path, number_of_examples)
     print GLOBAL_EXAMPLES_COUNTER
