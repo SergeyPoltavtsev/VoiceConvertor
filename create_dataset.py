@@ -1,4 +1,5 @@
 import os
+import sys
 
 # storage
 from Storage.TFStorage import *
@@ -52,10 +53,11 @@ def CutPhonemeIntoChunksAndSave(storage, phoneme_spectrums, chunkLength, phoneme
         row = (phone_item, phoneme_index, speaker)
         storage.insert_row(row)
         GLOBAL_EXAMPLES_COUNTER += 1
-
+        if number_of_examples == GLOBAL_EXAMPLES_COUNTER:
+            print "Created: " + str(GLOBAL_EXAMPLES_COUNTER) + " examples"
+            sys.exit(0)
 
 def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
-    global GLOBAL_EXAMPLES_COUNTER
     nistReader = NistReader()
     spectrogramFactory = SpectrogramFactory(window_size=config.WINDOW_SIZE, window_step=config.WINDOW_STEP)
 
@@ -90,9 +92,6 @@ def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
                 phoneme_spectrogram = spectrogramFactory.create_spectrogram(phone_file)
                 CutPhonemeIntoChunksAndSave(storage, phoneme_spectrogram.spectrogram_values,
                                             config.SPECTROGRAM_CHUNK_LENGTH, phoneme[2], speaker)
-                if number_of_examples == GLOBAL_EXAMPLES_COUNTER:
-                    print "Created: " + str(GLOBAL_EXAMPLES_COUNTER) + " examples"
-                    return
 
 
 if __name__ == '__main__':
