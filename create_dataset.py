@@ -90,7 +90,7 @@ def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
                 phoneme_spectrogram = spectrogramFactory.create_spectrogram(phone_file)
                 CutPhonemeIntoChunksAndSave(storage, phoneme_spectrogram.spectrogram_values,
                                             config.SPECTROGRAM_CHUNK_LENGTH, phoneme[2], speaker)
-                if(number_of_examples==GLOBAL_EXAMPLES_COUNTER):
+                if number_of_examples == GLOBAL_EXAMPLES_COUNTER:
                     print "Created: " + str(GLOBAL_EXAMPLES_COUNTER) + " examples"
                     return
 
