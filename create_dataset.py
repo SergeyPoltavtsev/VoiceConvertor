@@ -91,7 +91,7 @@ def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
                 CutPhonemeIntoChunksAndSave(storage, phoneme_spectrogram.spectrogram_values,
                                             config.SPECTROGRAM_CHUNK_LENGTH, phoneme[2], speaker)
                 if(number_of_examples==GLOBAL_EXAMPLES_COUNTER):
-                    print "Created: " + GLOBAL_EXAMPLES_COUNTER + " examples"
+                    print "Created: " + str(GLOBAL_EXAMPLES_COUNTER) + " examples"
                     return
 
 
