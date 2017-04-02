@@ -115,7 +115,7 @@ class TFStorage(object):
 
         # Convert from a spectrum vector of size config.CHUNK_VECTOR_SIZE to
         # a tensor of shape config.CHUNK_SHAPE
-        spectrum = tf.decode_raw(features['spectrum_raw'], tf.float64)
+        spectrum = tf.decode_raw(features['spectrum_raw'], tf.float32)
         spectrum.set_shape([config.CHUNK_VECTOR_SIZE])
 
         # Convert phoneme and speaker bytes(uint8) to string.

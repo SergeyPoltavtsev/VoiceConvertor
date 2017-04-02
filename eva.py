@@ -14,20 +14,19 @@ Summary of available functions:
  # Create a graph to run one step of training with respect to the loss.
  train_op = train(loss, global_step)
 """
-import tensorflow as tf
-import Utils.Eva_config_consts as config
-from Storage.TFStorage import TFStorage, TFStorageLabelOption, TFStorageOpenOptions
-
 from __future__ import division
 from __future__ import print_function
 
+import tensorflow as tf
+import Utils.Eva_config_consts as config
+from Storage.TFStorage import TFStorage, TFStorageLabelOption, TFStorageOpenOptions
 
 FLAGS = tf.app.flags.FLAGS
 
 # Basic model parameters.
 tf.app.flags.DEFINE_integer('batch_size', config.BATCH_SIZE,
                             """Number of images to process in a batch.""")
-tf.app.flags.DEFINE_string('storage_path', config.,
+tf.app.flags.DEFINE_string('storage_path', config.DATESET_FILE_PATH(),
                            """Path to the CIFAR-10 data directory.""")
 
 # Global constants describing the CIFAR-10 data set.
@@ -187,11 +186,11 @@ def inference(spectograms, train=False):
     # conv3_1
     with tf.variable_scope('conv3_1') as scope:
         kernel = _variable_with_weight_decay('weights',
-                                             shape=[3, 3, 64, 128],
+                                             shape=[3, 3, 128, 256],
                                              stddev=INITIAL_CONV_VARIABLES_STDDEV,
                                              wd=0.0)
         conv = tf.nn.conv2d(pool2, kernel, [1, 1, 1, 1], padding='SAME')
-        biases = _variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
+        biases = _variable_on_cpu('biases', [256], tf.constant_initializer(0.0))
         pre_activation = tf.nn.bias_add(conv, biases)
         conv3_1 = tf.nn.relu(pre_activation, name=scope.name)
         _activation_summary(conv3_1)
@@ -199,11 +198,11 @@ def inference(spectograms, train=False):
     # conv3_2
     with tf.variable_scope('conv3_2') as scope:
         kernel = _variable_with_weight_decay('weights',
-                                             shape=[3, 3, 128, 128],
+                                             shape=[3, 3, 256, 256],
                                              stddev=INITIAL_CONV_VARIABLES_STDDEV,
                                              wd=0.0)
         conv = tf.nn.conv2d(conv3_1, kernel, [1, 1, 1, 1], padding='SAME')
-        biases = _variable_on_cpu('biases', [128], tf.constant_initializer(0.1))
+        biases = _variable_on_cpu('biases', [256], tf.constant_initializer(0.1))
         pre_activation = tf.nn.bias_add(conv, biases)
         conv3_2 = tf.nn.relu(pre_activation, name=scope.name)
         _activation_summary(conv3_2)
