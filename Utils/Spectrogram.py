@@ -49,6 +49,9 @@ class Spectrogram(object):
         self.window_step = window_step
         self._wave_form, self._frame_rate = get_wav_info(file_path)
         self.spectrogram_values = self._calculate_spectrogram()
+        # We need to cast spectrograms from np.complex128 to np.complex64
+        # because tensorflow does not fully support float64
+        self.spectrogram_values = self.spectrogram_values.astype(np.complex64)
         self._averaged_spectrogram_values, self.frequencies, self.times = self._average_spectrogram_intensity()
 
         # Stores only real part of Fourier Transform
