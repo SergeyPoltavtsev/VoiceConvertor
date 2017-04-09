@@ -56,6 +56,9 @@ def train():
         # updates the model parameters.
         train_op = eva.train(loss, global_step)
 
+        # Initialize variables
+        init = tf.global_variables_initializer()
+
         class _LoggerHook(tf.train.SessionRunHook):
             """Logs loss and runtime."""
 
@@ -88,8 +91,7 @@ def train():
                 config=tf.ConfigProto(
                     log_device_placement=FLAGS.log_device_placement)) as mon_sess:
 
-            # Require fro getting an input batch from the storage
-            init = tf.global_variables_initializer()
+            # Require for getting an input batch from the storage
             mon_sess.run(init)
             tf.train.start_queue_runners(sess=mon_sess)
 
