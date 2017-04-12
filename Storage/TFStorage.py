@@ -151,7 +151,7 @@ class TFStorage(object):
         #min_fraction_of_examples_in_queue = 0.4
         #min_queue_examples = int(config.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN *
         #                         min_fraction_of_examples_in_queue)
-        min_queue_examples = 10000
+        min_queue_examples = 2000
 
         # Generate a batch of images and labels by building up a queue of examples.
         return self._generate_image_and_label_batch(spectrogram, label,
@@ -175,19 +175,16 @@ class TFStorage(object):
 
         # Create a queue that shuffles the examples, and then
         # read 'batch_size' spectrograms + labels from the example queue.
-        num_preprocess_threads = 16
         if shuffle:
             spectrograms, label_batch = tf.train.shuffle_batch(
                 [spectrogram, label],
                 batch_size=batch_size,
-                num_threads=num_preprocess_threads,
                 capacity=min_queue_examples + 3 * batch_size,
                 min_after_dequeue=min_queue_examples)
         else:
             spectrograms, label_batch = tf.train.batch(
                 [spectrogram, label],
                 batch_size=batch_size,
-                num_threads=num_preprocess_threads,
                 capacity=min_queue_examples + 3 * batch_size)
 
         # Display the training images in the visualizer.
