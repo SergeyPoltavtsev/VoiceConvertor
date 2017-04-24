@@ -37,8 +37,8 @@ NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = config.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 # Constants describing the training process.
 MOVING_AVERAGE_DECAY = 0.9999  # The decay to use for the moving average.
 NUM_EPOCHS_PER_DECAY = 350.0  # Epochs after which learning rate decays.
-LEARNING_RATE_DECAY_FACTOR = 0.1  # Learning rate decay factor.
-INITIAL_LEARNING_RATE = 0.1  # Initial learning rate.
+LEARNING_RATE_DECAY_FACTOR = 0.001  # Learning rate decay factor.
+INITIAL_LEARNING_RATE = 0.02  # Initial learning rate.
 INITIAL_CONV_VARIABLES_STDDEV = 5e-2  # Initial stddev for convolution layer variables
 DROPOUT_COEFICIENT = 0.5  # 50%
 
