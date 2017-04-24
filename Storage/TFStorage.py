@@ -148,10 +148,8 @@ class TFStorage(object):
             label = speaker
 
         # Ensure that the random shuffling has good mixing properties.
-        #min_fraction_of_examples_in_queue = 0.4
-        #min_queue_examples = int(config.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN *
-        #                         min_fraction_of_examples_in_queue)
-        min_queue_examples = 2000
+        min_fraction_of_examples_in_queue = 0.1
+        min_queue_examples = int(config.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN * min_fraction_of_examples_in_queue)
 
         # Generate a batch of images and labels by building up a queue of examples.
         return self._generate_image_and_label_batch(spectrogram, label,
@@ -180,7 +178,7 @@ class TFStorage(object):
                 [spectrogram, label],
                 batch_size=batch_size,
                 capacity=min_queue_examples + 3 * batch_size,
-                min_after_dequeue=min_queue_examples)
+                min_after_dequeue=min_queue_examples * 0.1)
         else:
             spectrograms, label_batch = tf.train.batch(
                 [spectrogram, label],
