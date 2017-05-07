@@ -74,6 +74,23 @@ def _variable_on_cpu(name, shape, initializer):
     return var
 
 
+def _variable(name, shape, stddev):
+    """
+    Helper to create an initialized Variable.
+    All variables are initialized with truncated normal distribution.
+
+    :param name: name of the variable
+    :param shape: list of ints which denotes a variable shape
+    :param stddev: standard deviation of a truncated Gaussian distribution
+    :return: variable tensor
+    """
+    dtype = tf.float32
+    variable = _variable_on_cpu(
+        name,
+        shape,
+        tf.truncated_normal_initializer(stddev=stddev, dtype=dtype))
+    return variable
+
 def _variable_with_weight_decay(name, shape, stddev, wd):
     """
     Helper to create an initialized Variable with weight decay.
@@ -97,8 +114,134 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
         tf.add_to_collection('losses', weight_decay)
     return var
 
+def conv_layer(layer_name, filter_shape, strides, input):
+    """
+    Creates a convolutional layer. The kernels are initialized with truncated normal distribution
+    and 0 weight decay. All biases are initialized with 0.
+    
+    :param layer_name: A layer name
+    :param filter_shape: Filter shape of type [h, w, c_i, c_o] where
+     h - height
+     w - width
+     c_i - input channels
+     c_o - output channels
+    :param strides: the same as tf.nn.conv2.strides 
+    :param input: input batch
+    :return: activations
+    """
+    with tf.variable_scope(layer_name) as scope:
+        kernel = _variable_with_weight_decay('weights',
+                                             shape=filter_shape,
+                                             stddev=INITIAL_CONV_VARIABLES_STDDEV,
+                                             wd=0.0)
+        conv = tf.nn.conv2d(input, kernel, strides, padding='SAME')
+        biases_count = filter_shape[-1];
+        biases = _variable_on_cpu('biases', [biases_count], tf.constant_initializer(0.0))
+        pre_activation = tf.nn.bias_add(conv, biases)
+        activations = tf.nn.relu(pre_activation, name=scope.name)
+        _activation_summary(activations)
+        return activations
+
+def pool_layer(layer_name, filter_shape, strides, input):
+    """
+    Creates a pooling layer.
+
+    :param layer_name: layer name
+    :param filter_shape: tf.nn.max_pool.ksize
+    :param strides: the same as tf.nn.max_pool.strides 
+    :param input: input batch
+    :return: activations
+    """
+    return tf.nn.max_pool(input, ksize=filter_shape, strides=strides,
+                   padding='SAME', name=layer_name)
+
+def fully_connected_layer(layer_name, neurons_number, input):
+    """
+    Creates a fully connected layer
+    
+    :param layer_name: layer name
+    :param neurons_number: number of neurons in the layer
+    :param input: input
+    :return: activations
+    """
+    with tf.variable_scope(layer_name) as scope:
+        inputs = input
+        # Dropout
+        if train:
+            inputs = tf.nn.dropout(input, DROPOUT_COEFICIENT)
+
+        dim = inputs.get_shape()[1].value
+        weights = _variable_with_weight_decay('weights', shape=[dim, neurons_number], stddev=0.04, wd=0.004)
+        biases = _variable_on_cpu('biases', [neurons_number], tf.constant_initializer(0.1))
+        fc = tf.nn.relu(tf.matmul(inputs, weights) + biases, name=scope.name)
+        _activation_summary(fc)
+        return fc
+
 
 def inference(spectograms, train=False):
+    """
+    Build the EVA model.
+
+    | Layer     | Layer output size |
+    |-----------|-------------------|
+    | INPUT     | 512x11x2          |
+    | CONV3-64  | 512x11x64         |
+    | CONV3-64  | 512x11x64         |
+    | POOL 2x1  | 256x11x64         |
+    | CONV3-128 | 256x11x128        |
+    | CONV3-128 | 256x11x128        |
+    | POOL 2x1  | 128x11x128        |
+    | CONV3-256 | 128x11x256        |
+    | CONV3-256 | 128x11x256        |
+    | POOL 2x1  | 64x11x256         |
+    |           |                   |
+    | dropout   |                   |
+    | FC1       | 2048x1x1          |
+    | dropout   |                   |
+    | FC2       | 2048x1x1          |
+    | dropout   |                   |
+    | FC3       | Speaker / Phoneme |
+
+    :param spectograms: Spectrograms of size [config.SPECTROGRAM_HEIGHT x config.SPECTROGRAM_CHUNK_LENGTH x 2], which
+        are obtained from inputs().
+    :return: Logits
+    """
+
+    conv1_1 = conv_layer('conv1_1', [3, 3, 2, 64], [1, 1, 1, 1], spectograms)
+    conv1_2 = conv_layer('conv1_2', [3, 3, 64, 64], [1, 1, 1, 1], conv1_1)
+    pool1 = pool_layer('pool1', [1, 2, 1, 1], [1, 2, 1, 1], conv1_2)
+
+    conv2_1 = conv_layer('conv2_1', [3, 3, 64, 128], [1, 1, 1, 1], pool1)
+    conv2_2 = conv_layer('conv2_2', [3, 3, 128, 128], [1, 1, 1, 1], conv2_1)
+    pool2 = pool_layer('pool2', [1, 2, 1, 1], [1, 2, 1, 1], conv2_2)
+
+    conv3_1 = conv_layer('conv3_1', [3, 3, 128, 256], [1, 1, 1, 1], pool2)
+    conv3_2 = conv_layer('conv3_2', [3, 3, 256, 256], [1, 1, 1, 1], conv3_1)
+    pool3 = pool_layer('pool3', [1, 2, 1, 1], [1, 2, 1, 1], conv3_2)
+
+    # Move everything into a vector so we can perform a single matrix multiply.
+    reshaped = tf.reshape(pool3, [FLAGS.batch_size, -1])
+    fc1 = fully_connected_layer('fc1', 2048, reshaped)
+    fc2 = fully_connected_layer('fc2', 2048, fc1)
+
+    # linear layer(WX + b),
+    # We don't apply softmax here because
+    # tf.nn.sparse_softmax_cross_entropy_with_logits accepts the unscaled logits
+    # and performs the softmax internally for efficiency.
+    with tf.variable_scope('softmax_linear') as scope:
+        # Dropout
+        if train:
+            fc2 = tf.nn.dropout(fc2, DROPOUT_COEFICIENT)
+        weights = _variable_with_weight_decay('weights', [2048, config.NUM_PHONOME_CLASSES], stddev=1 / 2048.0, wd=0.0)
+        biases = _variable_on_cpu('biases', [config.NUM_PHONOME_CLASSES],
+                                  tf.constant_initializer(0.0))
+        softmax_linear = tf.add(tf.matmul(fc2, weights), biases, name=scope.name)
+        _activation_summary(softmax_linear)
+
+    return softmax_linear
+
+
+def inference2(spectograms, train=False):
     """
     Build the EVA model.
 
@@ -181,7 +324,7 @@ def inference(spectograms, train=False):
 
     # pool2
     pool2 = tf.nn.max_pool(conv2_2, ksize=[1, 2, 1, 1], strides=[1, 2, 1, 1],
-                           padding='SAME', name='pool1')
+                           padding='SAME', name='pool2')
 
     # conv3_1
     with tf.variable_scope('conv3_1') as scope:
@@ -209,7 +352,7 @@ def inference(spectograms, train=False):
 
     # pool2
     pool3 = tf.nn.max_pool(conv3_2, ksize=[1, 2, 1, 1], strides=[1, 2, 1, 1],
-                           padding='SAME', name='pool1')
+                           padding='SAME', name='pool3')
 
     # fc1
     with tf.variable_scope('fc1') as scope:
