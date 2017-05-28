@@ -178,7 +178,7 @@ def fully_connected_layer(layer_name, neurons_number, input):
         return fc
 
 
-def inference(spectograms, train=False):
+def inference2(spectograms, train=False):
     """
     Build the EVA model.
 
@@ -240,8 +240,7 @@ def inference(spectograms, train=False):
 
     return softmax_linear
 
-
-def inference2(spectograms, train=False):
+def inference(spectograms, train=False):
     """
     Build the EVA model.
 
@@ -270,113 +269,14 @@ def inference2(spectograms, train=False):
     :return: Logits
     """
 
-    # conv1_1
-    with tf.variable_scope('conv1_1') as scope:
-        kernel = _variable_with_weight_decay('weights',
-                                             shape=[3, 3, 2, 64],
-                                             stddev=INITIAL_CONV_VARIABLES_STDDEV,
-                                             wd=0.0)
-        conv = tf.nn.conv2d(spectograms, kernel, [1, 1, 1, 1], padding='SAME')
-        biases = _variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
-        pre_activation = tf.nn.bias_add(conv, biases)
-        conv1_1 = tf.nn.relu(pre_activation, name=scope.name)
-        _activation_summary(conv1_1)
+    conv1_1 = conv_layer('conv1_1', [3, 3, 2, 64], [1, 1, 1, 1], spectograms)
+    conv1_2 = conv_layer('conv1_2', [3, 3, 64, 64], [1, 1, 1, 1], conv1_1)
+    pool1 = pool_layer('pool1', [1, 2, 1, 1], [1, 2, 1, 1], conv1_2)
 
-    # conv1_2
-    with tf.variable_scope('conv1_2') as scope:
-        kernel = _variable_with_weight_decay('weights',
-                                             shape=[3, 3, 64, 64],
-                                             stddev=INITIAL_CONV_VARIABLES_STDDEV,
-                                             wd=0.0)
-        conv = tf.nn.conv2d(conv1_1, kernel, [1, 1, 1, 1], padding='SAME')
-        biases = _variable_on_cpu('biases', [64], tf.constant_initializer(0.1))
-        pre_activation = tf.nn.bias_add(conv, biases)
-        conv1_2 = tf.nn.relu(pre_activation, name=scope.name)
-        _activation_summary(conv1_2)
-
-    # pool1
-    pool1 = tf.nn.max_pool(conv1_2, ksize=[1, 2, 1, 1], strides=[1, 2, 1, 1],
-                           padding='SAME', name='pool1')
-
-    # conv2_1
-    with tf.variable_scope('conv2_1') as scope:
-        kernel = _variable_with_weight_decay('weights',
-                                             shape=[3, 3, 64, 128],
-                                             stddev=INITIAL_CONV_VARIABLES_STDDEV,
-                                             wd=0.0)
-        conv = tf.nn.conv2d(pool1, kernel, [1, 1, 1, 1], padding='SAME')
-        biases = _variable_on_cpu('biases', [128], tf.constant_initializer(0.0))
-        pre_activation = tf.nn.bias_add(conv, biases)
-        conv2_1 = tf.nn.relu(pre_activation, name=scope.name)
-        _activation_summary(conv2_1)
-
-    # conv2_2
-    with tf.variable_scope('conv2_2') as scope:
-        kernel = _variable_with_weight_decay('weights',
-                                             shape=[3, 3, 128, 128],
-                                             stddev=INITIAL_CONV_VARIABLES_STDDEV,
-                                             wd=0.0)
-        conv = tf.nn.conv2d(conv2_1, kernel, [1, 1, 1, 1], padding='SAME')
-        biases = _variable_on_cpu('biases', [128], tf.constant_initializer(0.1))
-        pre_activation = tf.nn.bias_add(conv, biases)
-        conv2_2 = tf.nn.relu(pre_activation, name=scope.name)
-        _activation_summary(conv2_2)
-
-    # pool2
-    pool2 = tf.nn.max_pool(conv2_2, ksize=[1, 2, 1, 1], strides=[1, 2, 1, 1],
-                           padding='SAME', name='pool2')
-
-    # conv3_1
-    with tf.variable_scope('conv3_1') as scope:
-        kernel = _variable_with_weight_decay('weights',
-                                             shape=[3, 3, 128, 256],
-                                             stddev=INITIAL_CONV_VARIABLES_STDDEV,
-                                             wd=0.0)
-        conv = tf.nn.conv2d(pool2, kernel, [1, 1, 1, 1], padding='SAME')
-        biases = _variable_on_cpu('biases', [256], tf.constant_initializer(0.0))
-        pre_activation = tf.nn.bias_add(conv, biases)
-        conv3_1 = tf.nn.relu(pre_activation, name=scope.name)
-        _activation_summary(conv3_1)
-
-    # conv3_2
-    with tf.variable_scope('conv3_2') as scope:
-        kernel = _variable_with_weight_decay('weights',
-                                             shape=[3, 3, 256, 256],
-                                             stddev=INITIAL_CONV_VARIABLES_STDDEV,
-                                             wd=0.0)
-        conv = tf.nn.conv2d(conv3_1, kernel, [1, 1, 1, 1], padding='SAME')
-        biases = _variable_on_cpu('biases', [256], tf.constant_initializer(0.1))
-        pre_activation = tf.nn.bias_add(conv, biases)
-        conv3_2 = tf.nn.relu(pre_activation, name=scope.name)
-        _activation_summary(conv3_2)
-
-    # pool2
-    pool3 = tf.nn.max_pool(conv3_2, ksize=[1, 2, 1, 1], strides=[1, 2, 1, 1],
-                           padding='SAME', name='pool3')
-
-    # fc1
-    with tf.variable_scope('fc1') as scope:
-        # Move everything into depth so we can perform a single matrix multiply.
-        reshape = tf.reshape(pool3, [FLAGS.batch_size, -1])
-        # Dropout
-        if train:
-            reshape = tf.nn.dropout(reshape, DROPOUT_COEFICIENT)
-
-        dim = reshape.get_shape()[1].value
-        weights = _variable_with_weight_decay('weights', shape=[dim, 2048], stddev=0.04, wd=0.004)
-        biases = _variable_on_cpu('biases', [2048], tf.constant_initializer(0.1))
-        fc1 = tf.nn.relu(tf.matmul(reshape, weights) + biases, name=scope.name)
-        _activation_summary(fc1)
-
-    # fc2
-    with tf.variable_scope('fc2') as scope:
-        # Dropout
-        if train:
-            fc1 = tf.nn.dropout(fc1, DROPOUT_COEFICIENT)
-        weights = _variable_with_weight_decay('weights', shape=[2048, 2048], stddev=0.04, wd=0.004)
-        biases = _variable_on_cpu('biases', [2048], tf.constant_initializer(0.1))
-        fc2 = tf.nn.relu(tf.matmul(fc1, weights) + biases, name=scope.name)
-        _activation_summary(fc2)
+    # Move everything into a vector so we can perform a single matrix multiply.
+    reshaped = tf.reshape(pool1, [FLAGS.batch_size, -1])
+    fc1 = fully_connected_layer('fc1', 2048, reshaped)
+    fc2 = fully_connected_layer('fc2', 2048, fc1)
 
     # linear layer(WX + b),
     # We don't apply softmax here because
