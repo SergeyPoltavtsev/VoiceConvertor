@@ -186,6 +186,6 @@ class TFStorage(object):
                 capacity=min_queue_examples + 3 * batch_size)
 
         # Display the training images in the visualizer.
-        # tf.contrib.deprecated.image_summary('spectrograms', spectrograms)
+        # tf.summary.image('spectrograms', spectrograms)
 
         return spectrograms, tf.reshape(label_batch, [batch_size])
