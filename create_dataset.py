@@ -88,12 +88,13 @@ def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
                     start = int(phoneme[0])
                     end = int(phoneme[1])
                 else:
-                    start = int(phoneme[0]) - config.PHONEME_OFFSET
-                    end = int(phoneme[1]) + config.PHONEME_OFFSET
-
-                # in case is a phone lasts less than window_size the window size is used.
-                if end-start < config.WINDOW_SIZE:
-                    end = start + config.WINDOW_SIZE
+                    # in case is a phone lasts less than window_size the window size is used.
+                    if int(phoneme[1]) - int(phoneme[0]) < config.WINDOW_SIZE:
+                        start = int(phoneme[0]) - config.PHONEME_OFFSET
+                        end = int(phoneme[0]) + config.WINDOW_SIZE + config.PHONEME_OFFSET
+                    else:
+                        start = int(phoneme[0]) - config.PHONEME_OFFSET
+                        end = int(phoneme[1]) + config.PHONEME_OFFSET
 
                 phone_file = sound_utils.cutPhonemeChunk(wav_file, config.TEMP_PHONEME_FOLDER_PATH, start, end,
                                                          phoneme[2])
