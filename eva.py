@@ -182,18 +182,19 @@ def inference2(spectograms, train=False):
     """
     Build the EVA model.
 
+
     | Layer     | Layer output size |
     |-----------|-------------------|
-    | INPUT     | 512x11x2          |
-    | CONV3-64  | 512x11x64         |
-    | CONV3-64  | 512x11x64         |
-    | POOL 2x1  | 256x11x64         |
-    | CONV3-128 | 256x11x128        |
-    | CONV3-128 | 256x11x128        |
-    | POOL 2x1  | 128x11x128        |
-    | CONV3-256 | 128x11x256        |
-    | CONV3-256 | 128x11x256        |
-    | POOL 2x1  | 64x11x256         |
+    | INPUT     | 64x11x1          |
+    | CONV3-64  | 64x11x64         |
+    | CONV3-64  | 64x11x64         |
+    | POOL 2x1  | 32x11x64         |
+    | CONV3-128 | 32x11x128        |
+    | CONV3-128 | 32x11x128        |
+    | POOL 2x1  | 16x11x128        |
+    | CONV3-256 | 16x11x256        |
+    | CONV3-256 | 16x11x256        |
+    | POOL 2x1  | 8x11x256         |
     |           |                   |
     | dropout   |                   |
     | FC1       | 2048x1x1          |
@@ -207,7 +208,7 @@ def inference2(spectograms, train=False):
     :return: Logits
     """
 
-    conv1_1 = conv_layer('conv1_1', [3, 3, 2, 64], [1, 1, 1, 1], spectograms)
+    conv1_1 = conv_layer('conv1_1', [3, 3, 1, 64], [1, 1, 1, 1], spectograms)
     conv1_2 = conv_layer('conv1_2', [3, 3, 64, 64], [1, 1, 1, 1], conv1_1)
     pool1 = pool_layer('pool1', [1, 2, 1, 1], [1, 2, 1, 1], conv1_2)
 
@@ -246,16 +247,10 @@ def inference(spectograms, train=False):
 
     | Layer     | Layer output size |
     |-----------|-------------------|
-    | INPUT     | 512x11x2          |
-    | CONV3-64  | 512x11x64         |
-    | CONV3-64  | 512x11x64         |
-    | POOL 2x1  | 256x11x64         |
-    | CONV3-128 | 256x11x128        |
-    | CONV3-128 | 256x11x128        |
-    | POOL 2x1  | 128x11x128        |
-    | CONV3-256 | 128x11x256        |
-    | CONV3-256 | 128x11x256        |
-    | POOL 2x1  | 64x11x256         |
+    | INPUT     | 64x11x1          |
+    | CONV3-64  | 64x11x64         |
+    | CONV3-64  | 64x11x64         |
+    | POOL 2x1  | 32x11x64         |
     |           |                   |
     | dropout   |                   |
     | FC1       | 2048x1x1          |
@@ -269,7 +264,7 @@ def inference(spectograms, train=False):
     :return: Logits
     """
 
-    conv1_1 = conv_layer('conv1_1', [3, 3, 2, 64], [1, 1, 1, 1], spectograms)
+    conv1_1 = conv_layer('conv1_1', [3, 3, 1, 64], [1, 1, 1, 1], spectograms)
     conv1_2 = conv_layer('conv1_2', [3, 3, 64, 64], [1, 1, 1, 1], conv1_1)
     pool1 = pool_layer('pool1', [1, 2, 1, 1], [1, 2, 1, 1], conv1_2)
 

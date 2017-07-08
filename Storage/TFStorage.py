@@ -178,7 +178,7 @@ class TFStorage(object):
                 [spectrogram, label],
                 batch_size=batch_size,
                 capacity=min_queue_examples + 3 * batch_size,
-                min_after_dequeue=min_queue_examples * 0.1)
+                min_after_dequeue=int(min_queue_examples * 0.1))
         else:
             spectrograms, label_batch = tf.train.batch(
                 [spectrogram, label],
