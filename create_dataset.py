@@ -91,6 +91,10 @@ def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
                     start = int(phoneme[0]) - config.PHONEME_OFFSET
                     end = int(phoneme[1]) + config.PHONEME_OFFSET
 
+                # in case is a phone lasts less than window_size the window size is used.
+                if end-start < config.WINDOW_SIZE:
+                    end = start + config.WINDOW_SIZE
+
                 phone_file = sound_utils.cutPhonemeChunk(wav_file, config.TEMP_PHONEME_FOLDER_PATH, start, end,
                                                          phoneme[2])
                 phone_wave_form, frame_rate = sound_utils.get_wav_info(phone_file)
