@@ -87,6 +87,8 @@ def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
                 if i == 0 or i == len(phonemes):
                     start = int(phoneme[0])
                     end = int(phoneme[1])
+                    if end - start < (config.WINDOW_SIZE + 2 * config.PHONEME_OFFSET):
+                        continue
                 else:
                     # in case is a phone lasts less than window_size the window size is used.
                     if int(phoneme[1]) - int(phoneme[0]) < config.WINDOW_SIZE:
