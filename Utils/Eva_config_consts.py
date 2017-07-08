@@ -45,10 +45,10 @@ Number of phoneme classes
 """
 NUM_PHONOME_CLASSES = len(TOTAL_TIMIT_PHONEME_LIST)
 
-"""
-For positive and negative frequences
-"""
-SPECTROGRAM_HEIGHT = 2 * WINDOW_SIZE
+# """
+# For positive and negative frequences
+# """
+# SPECTROGRAM_HEIGHT = 2 * WINDOW_SIZE
 
 """
 Every chunk contains CHUNK_LENGTH spectrums
@@ -61,20 +61,25 @@ Because we want to take into account the phoneme surroundings we take
 """
 PHONEME_OFFSET = 5 * WINDOW_STEP
 
+# """
+# For real and img values
+# """
+# SPECTROGRAM_DEPTH = 2
+
 """
 For real and img values
 """
-SPECTROGRAM_DEPTH = 2
+MFCC_DEPTH = 1
 
 """
 Spectrogram chunks are stored as vectors
 """
-CHUNK_VECTOR_SIZE = SPECTROGRAM_HEIGHT * SPECTROGRAM_CHUNK_LENGTH * SPECTROGRAM_DEPTH
+CHUNK_VECTOR_SIZE = NUM_MEL_FREQ_COMPONENTS * SPECTROGRAM_CHUNK_LENGTH * MFCC_DEPTH
 
 """
 The size of a chunk
 """
-CHUNK_SHAPE = (SPECTROGRAM_HEIGHT, SPECTROGRAM_CHUNK_LENGTH, SPECTROGRAM_DEPTH)
+CHUNK_SHAPE = (NUM_MEL_FREQ_COMPONENTS, SPECTROGRAM_CHUNK_LENGTH, MFCC_DEPTH)
 
 ####### TRAIN PARAMETERS #########
 """
