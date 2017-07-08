@@ -4,8 +4,33 @@ One spectrum is created out of this window. Afterwards, the window is shifted
 by FRAME_STEP to create the next spectrum.
 NOTE: 75% of overlap has shown the best performance in reconstruction.
 """
-WINDOW_SIZE = 256
-WINDOW_STEP = 64
+WINDOW_SIZE = 512
+WINDOW_STEP = 32
+
+"""
+Frame rate
+"""
+FRAME_RATE = 16000
+
+"""
+Spectrogram threshold
+"""
+SPEC_THRESH = 4
+
+"""
+Number of mel frequency components
+"""
+NUM_MEL_FREQ_COMPONENTS = 64
+
+"""
+MFCC start frequency
+"""
+START_FREQ = 0
+
+"""
+MFCC end frequency
+"""
+END_FREQ = 8000
 
 """
 Full list of TIMIT phonemes
@@ -63,7 +88,7 @@ NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 20000
 """
 Determines if it is local of server
 """
-IS_LOCAL = False;
+IS_LOCAL = False
 
 """
 Path to the dataset file

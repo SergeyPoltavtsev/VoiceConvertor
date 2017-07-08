@@ -16,7 +16,7 @@ from Utils.nist_reader import NistReader
 import Utils.sound_utils as sound_utils
 
 # Spectrograms
-from Utils.SpectrogramFactory import SpectrogramFactory
+from Utils.MFCC import *
 
 import numpy as np
 
@@ -59,7 +59,11 @@ def CutPhonemeIntoChunksAndSave(storage, phoneme_spectrums, chunkLength, phoneme
 
 def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
     nistReader = NistReader()
-    spectrogramFactory = SpectrogramFactory(window_size=config.WINDOW_SIZE, window_step=config.WINDOW_STEP)
+    mel_filter, mel_inversion_filter = create_mel_filter(fft_size=config.WINDOW_SIZE,
+                                                         n_freq_components=config.NUM_MEL_FREQ_COMPONENTS,
+                                                         start_freq=config.START_FREQ,
+                                                         end_freq=config.END_FREQ,
+                                                         samplerate=config.FRAME_RATE)
 
     # create a list of paths to WAV files inside path_to_TIMIT
     paths = folder_utils.reverse_folder(path_to_TIMIT, ".WAV")
@@ -89,7 +93,14 @@ def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
 
                 phone_file = sound_utils.cutPhonemeChunk(wav_file, config.TEMP_PHONEME_FOLDER_PATH, start, end,
                                                          phoneme[2])
-                phoneme_spectrogram = spectrogramFactory.create_spectrogram(phone_file)
+                phone_wave_form, frame_rate = sound_utils.get_wav_info(phone_file)
+
+                # create spectrogram of a phone chunk
+                phoneme_spectrogram = pretty_spectrogram(phone_wave_form, fft_size=config.WINDOW_SIZE,
+                                                         step_size=config.WINDOW_STEP, log=True,
+                                                         thresh=config.SPEC_THRESH)
+                # create mels out of spectrogram
+                mel_spec = make_mel(phoneme_spectrogram, mel_filter, shorten_factor=1)
                 CutPhonemeIntoChunksAndSave(storage, phoneme_spectrogram.spectrogram_values,
                                             config.SPECTROGRAM_CHUNK_LENGTH, phoneme[2], speaker)
 
