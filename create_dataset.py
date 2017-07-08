@@ -100,8 +100,8 @@ def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
                                                          step_size=config.WINDOW_STEP, log=True,
                                                          thresh=config.SPEC_THRESH)
                 # create mels out of spectrogram
-                mel_spec = make_mel(phoneme_spectrogram, mel_filter, shorten_factor=1)
-                CutPhonemeIntoChunksAndSave(storage, phoneme_spectrogram.spectrogram_values,
+                phone_mfcc = make_mel(phoneme_spectrogram, mel_filter, shorten_factor=1)
+                CutPhonemeIntoChunksAndSave(storage, phone_mfcc,
                                             config.SPECTROGRAM_CHUNK_LENGTH, phoneme[2], speaker)
 
 
