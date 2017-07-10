@@ -94,38 +94,7 @@ class TFStorage(object):
         self.writer.write(example.SerializeToString())
 
     # Reader
-    def _read_one_example(self):
-        """
-        Reads one example (one row) from a storage.
-
-        :return:
-            spectrogram vector: a vector of spectrogram data of size config.CHUNK_SHAPE
-            phoneme: phoneme
-            speaker: speaker
-        """
-        _, serialized_example = self.reader.read(self.filename_queue)
-
-        features = tf.parse_single_example(
-            serialized_example,
-            features={
-                'phoneme': tf.FixedLenFeature([], tf.int64),
-                'speaker': tf.FixedLenFeature([], tf.string),
-                'spectrum_raw': tf.FixedLenFeature([], tf.string),
-            })
-
-        # Convert from a spectrum vector of size config.CHUNK_VECTOR_SIZE to
-        # a tensor of shape config.CHUNK_SHAPE
-        spectrum = tf.decode_raw(features['spectrum_raw'], tf.float32)
-        spectrum.set_shape([config.CHUNK_VECTOR_SIZE])
-
-        # Convert phoneme and speaker bytes(uint8) to string.
-        phoneme = tf.cast(features['phoneme'], tf.int64)
-        speaker = tf.cast(features['speaker'], tf.string)
-        tf.reshape(spectrum, config.CHUNK_SHAPE)
-
-        return spectrum, phoneme, speaker
-
-    def inputs(self, labelOption, batch_size):
+    def inputs(self, labelOption, batch_size, shuffle=True):
         """
         Construct input for EVA evaluation using the Reader ops.
 
@@ -154,7 +123,7 @@ class TFStorage(object):
         # Generate a batch of images and labels by building up a queue of examples.
         return self._generate_image_and_label_batch(spectrogram, label,
                                                     min_queue_examples, batch_size,
-                                                    shuffle=True)
+                                                    shuffle=shuffle)
 
     def read_once(self, labelOption, batch_size):
         spectrogram, phoneme, speaker = self._read_one_example()
