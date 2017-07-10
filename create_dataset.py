@@ -115,10 +115,16 @@ def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
 if __name__ == '__main__':
     # full data set
     # path_to_TIMIT_subset = config.PATH_TO_TIMIT_TRAIN
+    train = False
+    if train:
+        # path to one dr1 folder
+        path_to_TIMIT_subset = os.path.join(config.PATH_TO_TIMIT_TRAIN, "dr1")
+        storage_path = config.DATESET_FILE_PATH()
+        number_of_examples = config.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
+    else:
+        path_to_TIMIT_subset = os.path.join(config.PATH_TO_TIMIT_TEST, "dr1")
+        storage_path = config.TEST_DATESET_FILE_PATH()
+        number_of_examples = config.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
-    # path to one dr1 folder
-    path_to_TIMIT_subset = os.path.join(config.PATH_TO_TIMIT_TRAIN, "dr1")
-    storage_path = config.DATESET_FILE_PATH()
-    number_of_examples = config.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
     create_dataset(path_to_TIMIT_subset, storage_path, number_of_examples)
     print GLOBAL_EXAMPLES_COUNTER

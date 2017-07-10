@@ -156,6 +156,23 @@ class TFStorage(object):
                                                     min_queue_examples, batch_size,
                                                     shuffle=True)
 
+    def read_once(self, labelOption, batch_size):
+        spectrogram, phoneme, speaker = self._read_one_example()
+        # Set the shapes of tensors.
+        spectrogram = tf.reshape(spectrogram, config.CHUNK_SHAPE)
+
+        if (labelOption == TFStorageLabelOption.PHONEME):
+            label = phoneme
+        else:
+            label = speaker
+
+        spectrograms, label_batch = tf.train.batch(
+            [spectrogram, label],
+            batch_size=batch_size)
+
+        return spectrograms, tf.reshape(label_batch, [batch_size])
+
+
     def _generate_image_and_label_batch(self, spectrogram, label, min_queue_examples, batch_size, shuffle):
         """Construct a queued batch of spectrograms and labels.
 

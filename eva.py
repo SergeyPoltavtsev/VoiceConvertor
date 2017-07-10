@@ -247,10 +247,10 @@ def inference(spectograms, train=False):
 
     | Layer     | Layer output size |
     |-----------|-------------------|
-    | INPUT     | 64x11x1          |
-    | CONV3-64  | 64x11x64         |
-    | CONV3-64  | 64x11x64         |
-    | POOL 2x1  | 32x11x64         |
+    | INPUT     | 64x11x1           |
+    | CONV3-64  | 64x11x64          |
+    | CONV3-64  | 64x11x64          |
+    | POOL 2x1  | 32x11x64          |
     |           |                   |
     | dropout   |                   |
     | FC1       | 2048x1x1          |

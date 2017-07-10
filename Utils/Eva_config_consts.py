@@ -108,10 +108,10 @@ def DATESET_FILE_PATH():
 """
 Path to the dataset file for tests
 """
-TEST_DATESET_FILE_PATH_SERVER = "Test_TimitStore.tfrecords"
+TEST_DATESET_FILE_NAME = "Test_TimitStore.tfrecords"
 def TEST_DATESET_FILE_PATH():
     folder = DATESET_FILE_PATH_LOCAL if IS_LOCAL else DATESET_FILE_PATH_SERVER
-    return folder + TEST_DATESET_FILE_PATH_SERVER
+    return folder + TEST_DATESET_FILE_NAME
 
 """
 Path to the train TIMIT data set
