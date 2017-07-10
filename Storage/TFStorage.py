@@ -84,9 +84,9 @@ class TFStorage(object):
 
         spectrum_raw = spectrum.tostring()
         example = tf.train.Example(features=tf.train.Features(feature={
-            'height': _int64_feature(config.SPECTROGRAM_HEIGHT),
+            'height': _int64_feature(config.NUM_MEL_FREQ_COMPONENTS),
             'width': _int64_feature(config.SPECTROGRAM_CHUNK_LENGTH),
-            'depth': _int64_feature(config.SPECTROGRAM_DEPTH),
+            'depth': _int64_feature(config.MFCC_DEPTH),
             'phoneme': _int64_feature(phoneme),
             'speaker': _bytes_feature(speaker),
             'spectrum_raw': _bytes_feature(spectrum_raw)}))
