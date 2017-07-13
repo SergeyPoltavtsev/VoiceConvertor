@@ -99,7 +99,7 @@ IS_LOCAL = False
 Path to the dataset file
 """
 DATESET_FILE_NAME = "TimitStore.tfrecords"
-DATESET_FILE_PATH_LOCAL = "/Volumes/BOOTCAMP/EVA/"
+DATESET_FILE_PATH_LOCAL = "/Users/Sergey/VoiceConvertor/"
 DATESET_FILE_PATH_SERVER = "/home/architector/VoiceConvertor/"
 def DATESET_FILE_PATH():
     folder = DATESET_FILE_PATH_LOCAL if IS_LOCAL else DATESET_FILE_PATH_SERVER

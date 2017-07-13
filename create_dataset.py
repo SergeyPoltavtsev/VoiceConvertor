@@ -40,17 +40,22 @@ def CutPhonemeIntoChunksAndSave(storage, phoneme_spectrums, chunkLength, phoneme
     """
 
     global GLOBAL_EXAMPLES_COUNTER
-    totalNumberOfSpectrums = phoneme_spectrums.shape[1]
+    totalNumberOfSpectrums = phoneme_spectrums.shape[0]
     # The stepLength is 1 therefore the number of chunks is calculated as follows
     numChunks = totalNumberOfSpectrums - chunkLength + 1
     phoneme_index = config.TOTAL_TIMIT_PHONEME_LIST.index(phoneme)
 
     for i in range(numChunks):
-        chunk = phoneme_spectrums[:, i:i + chunkLength]
-        real = np.real(chunk)
-        imag = np.imag(chunk)
-        phone_item = np.stack((real, imag), axis=-1)
-        row = (phone_item, phoneme_index, speaker)
+        chunk = phoneme_spectrums[i:i + chunkLength, :]
+        # shape check
+        if np.shape(chunk) != (config.SPECTROGRAM_CHUNK_LENGTH, config.NUM_MEL_FREQ_COMPONENTS):
+            raise ValueError('The chunk has incorrect shape' + str(np.shape(chunk)) + ' where expected' + '('
+                             + str(config.SPECTROGRAM_CHUNK_LENGTH) + ',' + str(config.NUM_MEL_FREQ_COMPONENTS) + ')')
+        if not isinstance(chunk[0][0], np.float32):
+            raise ValueError('The chunk values has incorrect type: ' + str(type(chunk[0][0])) + ' where expected: '
+                             + str(np.float32))
+
+        row = (chunk, phoneme_index, speaker)
         storage.insert_row(row)
         GLOBAL_EXAMPLES_COUNTER += 1
         if number_of_examples == GLOBAL_EXAMPLES_COUNTER:
@@ -115,10 +120,10 @@ def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
 if __name__ == '__main__':
     # full data set
     # path_to_TIMIT_subset = config.PATH_TO_TIMIT_TRAIN
-    train = False
+    train = True
     if train:
         # path to one dr1 folder
-        path_to_TIMIT_subset = os.path.join(config.PATH_TO_TIMIT_TRAIN, "dr1")
+        path_to_TIMIT_subset = os.path.join(config.PATH_TO_TIMIT_TRAIN, "dr2")
         storage_path = config.DATESET_FILE_PATH()
         number_of_examples = config.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
     else:

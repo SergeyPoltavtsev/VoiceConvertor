@@ -239,15 +239,16 @@ def xcorr_offset(x1, x2):
 
 def make_mel(spectrogram, mel_filter, shorten_factor=1):
     mel_spec = np.transpose(mel_filter).dot(np.transpose(spectrogram))
-    mel_spec = scipy.ndimage.zoom(mel_spec.astype('float32'), [1, 1. / shorten_factor]).astype('float16')
+    mel_spec = scipy.ndimage.zoom(mel_spec.astype('float32'), [1, 1. / shorten_factor])
     mel_spec = mel_spec[:, 1:-1]  # a little hacky but seemingly needed for clipping
-    return mel_spec
+    return np.transpose(mel_spec)
 
 
 def mel_to_spectrogram(mel_spec, mel_inversion_filter, spec_thresh, shorten_factor):
     """
     takes in an mel spectrogram and returns a normal spectrogram for inversion
     """
+    mel_spec = np.transpose(mel_spec)
     mel_spec = (mel_spec + spec_thresh)
     uncompressed_spec = np.transpose(np.transpose(mel_spec).dot(mel_inversion_filter))
     uncompressed_spec = scipy.ndimage.zoom(uncompressed_spec.astype('float32'), [1, shorten_factor]).astype('float16')
@@ -313,3 +314,10 @@ def create_mel_filter(fft_size, n_freq_components=64, start_freq=300, end_freq=8
     mel_filter = mel_inversion_filter.T / mel_inversion_filter.sum(axis=1)
 
     return mel_filter, mel_inversion_filter
+
+def visualize(features, plot_title="Untitled", figsize=(18,4)):
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=figsize)
+    cax = ax.matshow(np.transpose(features), interpolation='nearest', aspect='auto', cmap=plt.cm.afmhot,
+                     origin='lower')
+    fig.colorbar(cax)
+    plt.title(plot_title)
