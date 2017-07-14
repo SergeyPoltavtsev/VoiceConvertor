@@ -74,12 +74,12 @@ MFCC_DEPTH = 1
 """
 Spectrogram chunks are stored as vectors
 """
-CHUNK_VECTOR_SIZE = NUM_MEL_FREQ_COMPONENTS * SPECTROGRAM_CHUNK_LENGTH * MFCC_DEPTH
+CHUNK_VECTOR_SIZE = SPECTROGRAM_CHUNK_LENGTH * NUM_MEL_FREQ_COMPONENTS * MFCC_DEPTH
 
 """
 The size of a chunk
 """
-CHUNK_SHAPE = (NUM_MEL_FREQ_COMPONENTS, SPECTROGRAM_CHUNK_LENGTH, MFCC_DEPTH)
+CHUNK_SHAPE = (SPECTROGRAM_CHUNK_LENGTH, NUM_MEL_FREQ_COMPONENTS, MFCC_DEPTH)
 
 ####### TRAIN PARAMETERS #########
 """
@@ -112,6 +112,11 @@ TEST_DATESET_FILE_NAME = "Test_TimitStore.tfrecords"
 def TEST_DATESET_FILE_PATH():
     folder = DATESET_FILE_PATH_LOCAL if IS_LOCAL else DATESET_FILE_PATH_SERVER
     return folder + TEST_DATESET_FILE_NAME
+
+"""
+Path to the experimental storage
+"""
+EXPERIMENTAL_DATESET_FILE_PATH = "/Users/Sergey/VoiceConvertor/Experimental_TimitStore.tfrecords"
 
 """
 Path to the train TIMIT data set

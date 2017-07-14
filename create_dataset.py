@@ -1,5 +1,4 @@
 import os
-import sys
 
 # storage
 from Storage.TFStorage import *
@@ -18,49 +17,6 @@ import Utils.sound_utils as sound_utils
 # Spectrograms
 from Utils.MFCC import *
 
-import numpy as np
-
-GLOBAL_EXAMPLES_COUNTER = 0
-
-
-def CutPhonemeIntoChunksAndSave(storage, phoneme_spectrums, chunkLength, phoneme, speaker):
-    """
-    Accepts a spectrogram of arbitrary size of one concrete phoneme. Cuts chunks of size chunkLength which
-    will be input for the neural network. This gives the opportunity to deal with different phoneme length.
-    To create as many and as variable chunk spectrograms for the specified phoneme the shift of size 1 is used.
-    Finally, a cut chunk is saved to the storage.
-
-    :param storage: a TFStorage storage
-    :param phoneme_spectrums: Cut phoneme spectrogram
-    :param chunkLength: spectrogram chunk length which defines how many spectrums are considered
-    around the middle one. The middle one defines the phoneme and speaker.
-    :param phoneme: Phoneme string value
-    :param speaker: Speaker string value
-    :return:
-    """
-
-    global GLOBAL_EXAMPLES_COUNTER
-    totalNumberOfSpectrums = phoneme_spectrums.shape[0]
-    # The stepLength is 1 therefore the number of chunks is calculated as follows
-    numChunks = totalNumberOfSpectrums - chunkLength + 1
-    phoneme_index = config.TOTAL_TIMIT_PHONEME_LIST.index(phoneme)
-
-    for i in range(numChunks):
-        chunk = phoneme_spectrums[i:i + chunkLength, :]
-        # shape check
-        if np.shape(chunk) != (config.SPECTROGRAM_CHUNK_LENGTH, config.NUM_MEL_FREQ_COMPONENTS):
-            raise ValueError('The chunk has incorrect shape' + str(np.shape(chunk)) + ' where expected' + '('
-                             + str(config.SPECTROGRAM_CHUNK_LENGTH) + ',' + str(config.NUM_MEL_FREQ_COMPONENTS) + ')')
-        if not isinstance(chunk[0][0], np.float32):
-            raise ValueError('The chunk values has incorrect type: ' + str(type(chunk[0][0])) + ' where expected: '
-                             + str(np.float32))
-
-        row = (chunk, phoneme_index, speaker)
-        storage.insert_row(row)
-        GLOBAL_EXAMPLES_COUNTER += 1
-        if number_of_examples == GLOBAL_EXAMPLES_COUNTER:
-            print "Created: " + str(GLOBAL_EXAMPLES_COUNTER) + " examples"
-            sys.exit(0)
 
 def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
     nistReader = NistReader()
@@ -73,7 +29,7 @@ def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
     # create a list of paths to WAV files inside path_to_TIMIT
     paths = folder_utils.reverse_folder(path_to_TIMIT, ".WAV")
 
-    with TFStorage(storage_path, TFStorageOpenOptions.WRITE) as storage:
+    with TFStorage(storage_path, TFStorageOpenOptions.WRITE, number_of_examples) as storage:
         for path in paths:
             print path
             phonemes = TIMIT_utils.parse_phoneme_file(path)
@@ -113,8 +69,8 @@ def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
                                                          thresh=config.SPEC_THRESH)
                 # create mels out of spectrogram
                 phone_mfcc = make_mel(phoneme_spectrogram, mel_filter, shorten_factor=1)
-                CutPhonemeIntoChunksAndSave(storage, phone_mfcc,
-                                            config.SPECTROGRAM_CHUNK_LENGTH, phoneme[2], speaker)
+                storage.cut_phoneme_into_chunks_and_save(phone_mfcc, config.SPECTROGRAM_CHUNK_LENGTH,
+                                                    phoneme[2], speaker)
 
 
 if __name__ == '__main__':
@@ -132,4 +88,3 @@ if __name__ == '__main__':
         number_of_examples = config.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
     create_dataset(path_to_TIMIT_subset, storage_path, number_of_examples)
-    print GLOBAL_EXAMPLES_COUNTER

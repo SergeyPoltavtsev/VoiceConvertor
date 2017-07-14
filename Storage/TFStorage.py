@@ -1,6 +1,8 @@
 import tensorflow as tf
 import Utils.Eva_config_consts as config
+import numpy as np
 from enum import Enum
+import sys
 
 
 def _int64_feature(value):
@@ -42,19 +44,22 @@ class TFStorage(object):
     The Storage based on TFRecords
     """
 
-    def __init__(self, path, openOption):
+    def __init__(self, path, openOption, storageVolume=100000):
         """
         Initializes the storage
-
-        Inputs:
-        - path: a path to a storage file (should have .tfrecords extension)
-        - openOption: Specifies if the storage object should be created for reading or writing.
+        :param path: A path to a storage file (should have .tfrecords extension)
+        :param openOption: Specifies if the storage object should be created for reading or writing
+        :param storageVolume: Maximum number of rows
         """
+
         if not tf.gfile.Exists(path):
             raise ValueError('Failed to find file: ' + path)
 
         self.path = path
         self.openOption = openOption
+        if openOption == TFStorageOpenOptions.WRITE:
+            self.maximumNumberOfRows = storageVolume
+            self.currentNumberOfRows = 0
 
     def __enter__(self):
         if self.openOption == TFStorageOpenOptions.WRITE:
@@ -189,3 +194,40 @@ class TFStorage(object):
         # tf.summary.image('spectrograms', spectrograms)
 
         return spectrograms, tf.reshape(label_batch, [batch_size])
+
+    def cut_phoneme_into_chunks_and_save(self, phoneme_features, chunkLength, phoneme, speaker):
+        """
+        Accepts a spectrogram of arbitrary size of one concrete phoneme. Cuts chunks of size chunkLength which
+        will be input for the neural network. This gives the opportunity to deal with different phoneme length.
+        To create as many and as variable chunk spectrograms for the specified phoneme the shift of size 1 is used.
+        Finally, a cut chunk is saved to the storage.
+
+        :param phoneme_features: phoneme feature in this particular case mel frequencies
+        :param chunkLength: spectrogram chunk length which defines how many spectrums are considered
+        around the middle one. The middle one defines the phoneme and speaker.
+        :param phoneme: Phoneme string value
+        :param speaker: Speaker string value
+        :return:
+        """
+
+        totalNumberOfSpectrums = phoneme_features.shape[0]
+        # The stepLength is 1 therefore the number of chunks is calculated as follows
+        numChunks = totalNumberOfSpectrums - chunkLength + 1
+        phoneme_index = config.TOTAL_TIMIT_PHONEME_LIST.index(phoneme)
+
+        for i in range(numChunks):
+            chunk = phoneme_features[i:i + chunkLength, :]
+            # shape check
+            if np.shape(chunk) != (config.SPECTROGRAM_CHUNK_LENGTH, config.NUM_MEL_FREQ_COMPONENTS):
+                raise ValueError('The chunk has incorrect shape' + str(np.shape(chunk)) + ' where expected' + '('
+                                 + str(config.SPECTROGRAM_CHUNK_LENGTH) + ',' + str(config.NUM_MEL_FREQ_COMPONENTS) + ')')
+            if not isinstance(chunk[0][0], np.float32):
+                raise ValueError('The chunk values has incorrect type: ' + str(type(chunk[0][0])) + ' where expected: '
+                                 + str(np.float32))
+
+            row = (chunk, phoneme_index, speaker)
+            self.insert_row(row)
+            self.currentNumberOfRows += 1
+            if self.maximumNumberOfRows == self.currentNumberOfRows:
+                print "Added: " + str(self.currentNumberOfRows) + " rows"
+                sys.exit(0)
