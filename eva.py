@@ -178,7 +178,7 @@ def fully_connected_layer(layer_name, neurons_number, input):
         return fc
 
 
-def inference2(spectograms, train=False):
+def inference(spectograms, train=False):
     """
     Build the EVA model.
 
@@ -241,28 +241,7 @@ def inference2(spectograms, train=False):
 
     return softmax_linear
 
-def inference(spectograms, train=False):
-    """
-    Build the EVA model.
-
-    | Layer     | Layer output size |
-    |-----------|-------------------|
-    | INPUT     | 64x11x1           |
-    | CONV3-64  | 64x11x64          |
-    | CONV3-64  | 64x11x64          |
-    | POOL 2x1  | 32x11x64          |
-    |           |                   |
-    | dropout   |                   |
-    | FC1       | 2048x1x1          |
-    | dropout   |                   |
-    | FC2       | 2048x1x1          |
-    | dropout   |                   |
-    | FC3       | Speaker / Phoneme |
-
-    :param spectograms: Spectrograms of size [config.SPECTROGRAM_HEIGHT x config.SPECTROGRAM_CHUNK_LENGTH x 2], which
-        are obtained from inputs().
-    :return: Logits
-    """
+def inference2(spectograms, train=False):
 
     conv1_1 = conv_layer('conv1_1', [3, 3, 1, 64], [1, 1, 1, 1], spectograms)
     conv1_2 = conv_layer('conv1_2', [3, 3, 64, 64], [1, 1, 1, 1], conv1_1)
