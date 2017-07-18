@@ -44,7 +44,7 @@ class TFStorage(object):
     The Storage based on TFRecords
     """
 
-    def __init__(self, path, openOption, storageVolume=100000):
+    def __init__(self, path, openOption, storageVolume=None):
         """
         Initializes the storage
         :param path: A path to a storage file (should have .tfrecords extension)
@@ -93,7 +93,7 @@ class TFStorage(object):
             'width': _int64_feature(config.SPECTROGRAM_CHUNK_LENGTH),
             'depth': _int64_feature(config.MFCC_DEPTH),
             'phoneme': _int64_feature(phoneme),
-            'speaker': _bytes_feature(speaker),
+            'speaker': _int64_feature(speaker),
             'spectrum_raw': _bytes_feature(spectrum_raw)}))
 
         self.writer.write(example.SerializeToString())
@@ -114,7 +114,7 @@ class TFStorage(object):
             serialized_example,
             features={
                 'phoneme': tf.FixedLenFeature([], tf.int64),
-                'speaker': tf.FixedLenFeature([], tf.string),
+                'speaker': tf.FixedLenFeature([], tf.int64),
                 'spectrum_raw': tf.FixedLenFeature([], tf.string),
             })
 
@@ -125,7 +125,7 @@ class TFStorage(object):
 
         # Convert phoneme and speaker bytes(uint8) to string.
         phoneme = tf.cast(features['phoneme'], tf.int64)
-        speaker = tf.cast(features['speaker'], tf.string)
+        speaker = tf.cast(features['speaker'], tf.int64)
         tf.reshape(spectrum, config.CHUNK_SHAPE)
 
         return spectrum, phoneme, speaker
@@ -214,6 +214,7 @@ class TFStorage(object):
         # The stepLength is 1 therefore the number of chunks is calculated as follows
         numChunks = totalNumberOfSpectrums - chunkLength + 1
         phoneme_index = config.TOTAL_TIMIT_PHONEME_LIST.index(phoneme)
+        speaker_index = config.TOTAL_SPEAKERS_LIST.index(speaker)
 
         for i in range(numChunks):
             chunk = phoneme_features[i:i + chunkLength, :]
@@ -225,9 +226,9 @@ class TFStorage(object):
                 raise ValueError('The chunk values has incorrect type: ' + str(type(chunk[0][0])) + ' where expected: '
                                  + str(np.float32))
 
-            row = (chunk, phoneme_index, speaker)
+            row = (chunk, phoneme_index, speaker_index)
             self.insert_row(row)
             self.currentNumberOfRows += 1
-            if self.maximumNumberOfRows == self.currentNumberOfRows:
+            if self.maximumNumberOfRows is not None and self.maximumNumberOfRows == self.currentNumberOfRows:
                 print "Added: " + str(self.currentNumberOfRows) + " rows"
                 sys.exit(0)

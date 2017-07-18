@@ -18,7 +18,7 @@ import Utils.sound_utils as sound_utils
 from Utils.MFCC import *
 
 
-def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
+def create_dataset(path_to_TIMIT, storage_path, number_of_examples=None):
     nistReader = NistReader()
     mel_filter, mel_inversion_filter = create_mel_filter(fft_size=config.WINDOW_SIZE,
                                                          n_freq_components=config.NUM_MEL_FREQ_COMPONENTS,
@@ -72,6 +72,8 @@ def create_dataset(path_to_TIMIT, storage_path, number_of_examples):
                 storage.cut_phoneme_into_chunks_and_save(phone_mfcc, config.SPECTROGRAM_CHUNK_LENGTH,
                                                     phoneme[2], speaker)
 
+        print "Added: " + str(storage.currentNumberOfRows) + " rows"
+
 
 if __name__ == '__main__':
     # full data set
@@ -79,11 +81,13 @@ if __name__ == '__main__':
     train = True
     if train:
         # path to one dr1 folder
-        path_to_TIMIT_subset = os.path.join(config.PATH_TO_TIMIT_TRAIN, "dr2")
+        # path_to_TIMIT_subset = os.path.join(config.PATH_TO_TIMIT_TRAIN, "dr2")
+        path_to_TIMIT_subset = config.PATH_TO_TIMIT_TRAIN
         storage_path = config.DATESET_FILE_PATH()
         number_of_examples = config.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
     else:
-        path_to_TIMIT_subset = os.path.join(config.PATH_TO_TIMIT_TEST, "dr1")
+        # path_to_TIMIT_subset = os.path.join(config.PATH_TO_TIMIT_TEST, "dr1")
+        path_to_TIMIT_subset = config.PATH_TO_TIMIT_TEST
         storage_path = config.TEST_DATESET_FILE_PATH()
         number_of_examples = config.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 

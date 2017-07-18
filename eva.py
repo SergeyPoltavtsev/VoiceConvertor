@@ -30,7 +30,7 @@ tf.app.flags.DEFINE_string('storage_path', config.DATESET_FILE_PATH(),
                            """Path to the CIFAR-10 data directory.""")
 
 # Global constants describing the CIFAR-10 data set.
-NUM_CLASSES = config.NUM_PHONOME_CLASSES
+NUM_CLASSES = config.NUM_SPEAKER_CLASSES
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = config.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = config.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
@@ -233,8 +233,8 @@ def inference(spectograms, train=False):
         # Dropout
         if train:
             fc2 = tf.nn.dropout(fc2, DROPOUT_COEFICIENT)
-        weights = _variable_with_weight_decay('weights', [2048, config.NUM_PHONOME_CLASSES], stddev=1 / 2048.0, wd=0.0)
-        biases = _variable_on_cpu('biases', [config.NUM_PHONOME_CLASSES],
+        weights = _variable_with_weight_decay('weights', [2048, NUM_CLASSES], stddev=1 / 2048.0, wd=0.0)
+        biases = _variable_on_cpu('biases', [NUM_CLASSES],
                                   tf.constant_initializer(0.0))
         softmax_linear = tf.add(tf.matmul(fc2, weights), biases, name=scope.name)
         _activation_summary(softmax_linear)
@@ -260,8 +260,8 @@ def inference2(spectograms, train=False):
         # Dropout
         if train:
             fc2 = tf.nn.dropout(fc2, DROPOUT_COEFICIENT)
-        weights = _variable_with_weight_decay('weights', [2048, config.NUM_PHONOME_CLASSES], stddev=1 / 2048.0, wd=0.0)
-        biases = _variable_on_cpu('biases', [config.NUM_PHONOME_CLASSES],
+        weights = _variable_with_weight_decay('weights', [2048, NUM_CLASSES], stddev=1 / 2048.0, wd=0.0)
+        biases = _variable_on_cpu('biases', [NUM_CLASSES],
                                   tf.constant_initializer(0.0))
         softmax_linear = tf.add(tf.matmul(fc2, weights), biases, name=scope.name)
         _activation_summary(softmax_linear)

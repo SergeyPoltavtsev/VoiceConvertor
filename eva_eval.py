@@ -104,7 +104,7 @@ def evaluate():
   """Eval CIFAR-10 for a number of steps."""
   with tf.Graph().as_default() as g, TFStorage(config.TEST_DATESET_FILE_PATH(), TFStorageOpenOptions.READ) as storage:
     # Get images and labels for CIFAR-10.
-    soundFeatures, labels = storage.inputs(TFStorageLabelOption.PHONEME, config.BATCH_SIZE, shuffle=False)
+    soundFeatures, labels = storage.inputs(TFStorageLabelOption.SPEAKER, config.BATCH_SIZE, shuffle=False)
 
     # Build a Graph that computes the logits predictions from the
     # inference model.

@@ -35,6 +35,23 @@ END_FREQ = 8000
 """
 Full list of TIMIT phonemes
 """
+TOTAL_SPEAKERS_LIST = ['faem0', 'fajw0', 'fcaj0', 'fcmm0', 'fcyl0', 'fdas1', 'fdnc0', 'fdxw0', 'feac0', 'fhlm0',
+                       'fjkl0', 'fkaa0', 'flma0', 'flmc0', 'fmjb0', 'fmkf0', 'fmmh0', 'fpjf0', 'frll0', 'fscn0',
+                       'fskl0', 'fsrh0', 'ftmg0', 'marc0', 'mbjv0', 'mcew0', 'mctm0', 'mdbp0', 'mdem0', 'mdlb0',
+                       'mdlc2', 'mdmt0', 'mdps0', 'mdss0', 'mdwd0', 'mefg0', 'mhrm0', 'mjae0', 'mjbg0', 'mjde0',
+                       'mjeb0', 'mjhi0', 'mjma0', 'mjmd0', 'mjpm0', 'mjrp0', 'mkah0', 'mkaj0', 'mkdt0', 'mkjo0',
+                       'mmaa0', 'mmag0', 'mmds0', 'mmgk0', 'mmxs0', 'mppc0', 'mprb0', 'mrab0', 'mrcw0', 'mrfk0',
+                       'mrgs0', 'mrhl0', 'mrjh0', 'mrjm0', 'mrjm1', 'mrjt0', 'mrlj0', 'mrlr0', 'mrms0', 'msat0',
+                       'mtat1', 'mtbc0', 'mtdb0', 'mtjg0', 'mwsb0', 'mzmb0']
+
+"""
+Number of speaker classes
+"""
+NUM_SPEAKER_CLASSES = len(TOTAL_SPEAKERS_LIST)
+
+"""
+Full list of TIMIT phonemes
+"""
 TOTAL_TIMIT_PHONEME_LIST = ['iy', 'ih', 'eh', 'ey', 'ae', 'aa', 'aw', 'ay', 'ah', 'ao', 'oy', 'ow', 'uh', 'uw', 'ux',
                             'er', 'ax', 'ix', 'axr', 'ax-h', 'jh', 'ch', 'b', 'd', 'g', 'p', 't', 'k', 'dx', 's', 'sh',
                             'z', 'zh', 'f', 'th', 'v', 'dh', 'm', 'n', 'ng', 'em', 'nx', 'en', 'eng', 'l', 'r', 'w',
@@ -121,12 +138,19 @@ EXPERIMENTAL_DATESET_FILE_PATH = "/Users/Sergey/VoiceConvertor/Experimental_Timi
 """
 Path to the train TIMIT data set
 """
-PATH_TO_TIMIT_TRAIN = "Data/TIMIT/timit/train"
+#phoneme
+#PATH_TO_TIMIT_TRAIN = "Data/TIMIT/timit/train"
+#speaker
+PATH_TO_TIMIT_TRAIN = "Data/dr2/train"
+
 
 """
 Path to the test TIMIT data set
 """
-PATH_TO_TIMIT_TEST = "Data/TIMIT/timit/test"
+#phoneme
+#PATH_TO_TIMIT_TEST = "Data/TIMIT/timit/test"
+#speaker
+PATH_TO_TIMIT_TEST = "Data/dr2/test"
 
 """
 Path to the temp data folder

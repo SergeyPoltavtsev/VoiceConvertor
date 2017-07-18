@@ -43,7 +43,7 @@ def train():
         global_step = tf.contrib.framework.get_or_create_global_step()
 
         # Get spectrograms and labels for EVA.
-        spectrograms, labels = storage.inputs(TFStorageLabelOption.PHONEME, config.BATCH_SIZE, shuffle=True)
+        spectrograms, labels = storage.inputs(TFStorageLabelOption.SPEAKER, config.BATCH_SIZE, shuffle=True)
 
         # Build a Graph that computes the logits predictions from the
         # inference model.
