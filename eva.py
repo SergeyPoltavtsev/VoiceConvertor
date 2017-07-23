@@ -223,46 +223,23 @@ def inference(spectograms, train=False):
     reshaped = tf.reshape(pool3, [FLAGS.batch_size, -1])
     fc1 = fully_connected_layer('fc1', 2048, reshaped)
     fc2 = fully_connected_layer('fc2', 2048, fc1)
+    # Dropout
+    if train:
+        fc2 = tf.nn.dropout(fc2, DROPOUT_COEFICIENT)
+    # Dropout
+    fc3 = fully_connected_layer('fc3', 2048, fc2)
+    if train:
+        fc3 = tf.nn.dropout(fc3, DROPOUT_COEFICIENT)
 
     # linear layer(WX + b),
     # We don't apply softmax here because
     # tf.nn.sparse_softmax_cross_entropy_with_logits accepts the unscaled logits
     # and performs the softmax internally for efficiency.
     with tf.variable_scope('softmax_linear') as scope:
-        # Dropout
-        if train:
-            fc2 = tf.nn.dropout(fc2, DROPOUT_COEFICIENT)
         weights = _variable_with_weight_decay('weights', [2048, NUM_CLASSES], stddev=1 / 2048.0, wd=0.0)
         biases = _variable_on_cpu('biases', [NUM_CLASSES],
                                   tf.constant_initializer(0.0))
-        softmax_linear = tf.add(tf.matmul(fc2, weights), biases, name=scope.name)
-        _activation_summary(softmax_linear)
-
-    return softmax_linear
-
-def inference2(spectograms, train=False):
-
-    conv1_1 = conv_layer('conv1_1', [3, 3, 1, 64], [1, 1, 1, 1], spectograms)
-    conv1_2 = conv_layer('conv1_2', [3, 3, 64, 64], [1, 1, 1, 1], conv1_1)
-    pool1 = pool_layer('pool1', [1, 2, 1, 1], [1, 2, 1, 1], conv1_2)
-
-    # Move everything into a vector so we can perform a single matrix multiply.
-    reshaped = tf.reshape(pool1, [FLAGS.batch_size, -1])
-    fc1 = fully_connected_layer('fc1', 2048, reshaped)
-    fc2 = fully_connected_layer('fc2', 2048, fc1)
-
-    # linear layer(WX + b),
-    # We don't apply softmax here because
-    # tf.nn.sparse_softmax_cross_entropy_with_logits accepts the unscaled logits
-    # and performs the softmax internally for efficiency.
-    with tf.variable_scope('softmax_linear') as scope:
-        # Dropout
-        if train:
-            fc2 = tf.nn.dropout(fc2, DROPOUT_COEFICIENT)
-        weights = _variable_with_weight_decay('weights', [2048, NUM_CLASSES], stddev=1 / 2048.0, wd=0.0)
-        biases = _variable_on_cpu('biases', [NUM_CLASSES],
-                                  tf.constant_initializer(0.0))
-        softmax_linear = tf.add(tf.matmul(fc2, weights), biases, name=scope.name)
+        softmax_linear = tf.add(tf.matmul(fc3, weights), biases, name=scope.name)
         _activation_summary(softmax_linear)
 
     return softmax_linear
