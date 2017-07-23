@@ -173,7 +173,7 @@ class TFStorage(object):
         features = tf.reshape(features, config.CHUNK_SHAPE)
 
         # Ensure that the random shuffling has good mixing properties.
-        min_fraction_of_examples_in_queue = 0.1
+        min_fraction_of_examples_in_queue = 0.9
         min_queue_examples = int(config.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN * min_fraction_of_examples_in_queue)
 
         # Generate a batch of images and labels by building up a queue of examples.
@@ -204,7 +204,7 @@ class TFStorage(object):
                 [features, phoneme, speaker],
                 batch_size=batch_size,
                 capacity=min_queue_examples + 3 * batch_size,
-                min_after_dequeue=int(min_queue_examples * 0.1))
+                min_after_dequeue=int(min_queue_examples * 0.9))
         else:
             features_batch, phoneme_batch, speaker_batch = tf.train.batch(
                 [features, phoneme, speaker],
