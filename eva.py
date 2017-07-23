@@ -19,7 +19,6 @@ from __future__ import print_function
 
 import tensorflow as tf
 import Utils.Eva_config_consts as config
-from Storage.TFStorage import TFStorage, TFStorageLabelOption, TFStorageOpenOptions
 
 FLAGS = tf.app.flags.FLAGS
 

@@ -24,7 +24,7 @@ import tensorflow as tf
 
 import Utils.Eva_config_consts as config
 import eva
-from Storage.TFStorage import TFStorage, TFStorageLabelOption, TFStorageOpenOptions
+from Storage.TFStorage import TFStorage, TFStorageOpenOptions
 
 FLAGS = tf.app.flags.FLAGS
 
