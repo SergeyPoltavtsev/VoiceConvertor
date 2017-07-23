@@ -18,11 +18,6 @@ class TFStorageOpenOptions(Enum):
     WRITE = 2
 
 
-class TFStorageLabelOption(Enum):
-    PHONEME = 1
-    SPEAKER = 2
-
-
 def get_total_number_of_rows(path):
     """
     Counts total number of examples in a .tfrecords file
@@ -83,123 +78,26 @@ class TFStorage(object):
             item[2] - speaker
         :return:
         """
-        spectrum = item[0]
+        features = item[0]
         phoneme = item[1]
         speaker = item[2]
 
-        spectrum_raw = spectrum.tostring()
+        features_raw = features.tostring()
         example = tf.train.Example(features=tf.train.Features(feature={
             'height': _int64_feature(config.NUM_MEL_FREQ_COMPONENTS),
-            'width': _int64_feature(config.SPECTROGRAM_CHUNK_LENGTH),
+            'width': _int64_feature(config.FEATURES_CHUNK_LENGTH),
             'depth': _int64_feature(config.MFCC_DEPTH),
             'phoneme': _int64_feature(phoneme),
             'speaker': _int64_feature(speaker),
-            'spectrum_raw': _bytes_feature(spectrum_raw)}))
+            'spectrum_raw': _bytes_feature(features_raw)}))
 
         self.writer.write(example.SerializeToString())
 
-    # Reader
-    def _read_one_example(self):
-        """
-        Reads one example (one row) from a storage.
-
-        :return:
-            spectrogram vector: a vector of spectrogram data of size config.CHUNK_SHAPE
-            phoneme: phoneme
-            speaker: speaker
-        """
-        _, serialized_example = self.reader.read(self.filename_queue)
-
-        features = tf.parse_single_example(
-            serialized_example,
-            features={
-                'phoneme': tf.FixedLenFeature([], tf.int64),
-                'speaker': tf.FixedLenFeature([], tf.int64),
-                'spectrum_raw': tf.FixedLenFeature([], tf.string),
-            })
-
-        # Convert from a spectrum vector of size config.CHUNK_VECTOR_SIZE to
-        # a tensor of shape config.CHUNK_SHAPE
-        spectrum = tf.decode_raw(features['spectrum_raw'], tf.float32)
-        spectrum.set_shape([config.CHUNK_VECTOR_SIZE])
-
-        # Convert phoneme and speaker bytes(uint8) to string.
-        phoneme = tf.cast(features['phoneme'], tf.int64)
-        speaker = tf.cast(features['speaker'], tf.int64)
-        tf.reshape(spectrum, config.CHUNK_SHAPE)
-
-        return spectrum, phoneme, speaker
-
-    def inputs(self, labelOption, batch_size, shuffle=True):
-        """
-        Construct input for EVA evaluation using the Reader ops.
-
-        :param labelOption: Specifies which labels to use either phoneme or speaker
-        :param batch_size: Number of examples per batch.
-        :return:
-            spectrograms: Chunk spectrograms. 4D tensor of [batch_size, SPECTROGRAM_HEIGHT,
-                SPECTROGRAM_CHUNK_LENGTH, SPECTROGRAM_DEPTH)] size.
-            labels: Labels. 1D tensor of [batch_size] size.
-        """
-        spectrogram, phoneme, speaker = self._read_one_example()
-        # Set the shapes of tensors.
-        spectrogram = tf.reshape(spectrogram, config.CHUNK_SHAPE)
-        # phoneme.set_shape([1])
-        # speaker.set_shape([1])
-
-        if (labelOption == TFStorageLabelOption.PHONEME):
-            label = phoneme
-        else:
-            label = speaker
-
-        # Ensure that the random shuffling has good mixing properties.
-        min_fraction_of_examples_in_queue = 0.1
-        min_queue_examples = int(config.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN * min_fraction_of_examples_in_queue)
-
-        # Generate a batch of images and labels by building up a queue of examples.
-        return self._generate_image_and_label_batch(spectrogram, label,
-                                                    min_queue_examples, batch_size,
-                                                    shuffle=shuffle)
-
-    def _generate_image_and_label_batch(self, spectrogram, label, min_queue_examples, batch_size, shuffle):
-        """Construct a queued batch of spectrograms and labels.
-
-        :param spectrogram: 3-D Tensor of config.CHUNK_SHAPE of type.float32.
-        :param label: 1-D Tensor of type.int32 either of phonemes or speakers
-        :param min_queue_examples: int32, minimum number of samples to retain
-            in the queue that provides of batches of examples.
-        :param batch_size: Number of examples per batch.
-        :param shuffle: boolean indicating whether to use a shuffling queue.
-        :return:
-            spectrograms: Chunk spectrograms. 4D tensor of [batch_size, SPECTROGRAM_HEIGHT,
-                SPECTROGRAM_CHUNK_LENGTH, SPECTROGRAM_DEPTH)] size.
-            labels: Labels. 1D tensor of [batch_size] size.
-        """
-
-        # Create a queue that shuffles the examples, and then
-        # read 'batch_size' spectrograms + labels from the example queue.
-        if shuffle:
-            spectrograms, label_batch = tf.train.shuffle_batch(
-                [spectrogram, label],
-                batch_size=batch_size,
-                capacity=min_queue_examples + 3 * batch_size,
-                min_after_dequeue=int(min_queue_examples * 0.1))
-        else:
-            spectrograms, label_batch = tf.train.batch(
-                [spectrogram, label],
-                batch_size=batch_size,
-                capacity=min_queue_examples + 3 * batch_size)
-
-        # Display the training images in the visualizer.
-        # tf.summary.image('spectrograms', spectrograms)
-
-        return spectrograms, tf.reshape(label_batch, [batch_size])
-
     def cut_phoneme_into_chunks_and_save(self, phoneme_features, chunkLength, phoneme, speaker):
         """
-        Accepts a spectrogram of arbitrary size of one concrete phoneme. Cuts chunks of size chunkLength which
+        Accepts a mfcc or spectrogram of arbitrary size of one concrete phoneme. Cuts chunks of size chunkLength which
         will be input for the neural network. This gives the opportunity to deal with different phoneme length.
-        To create as many and as variable chunk spectrograms for the specified phoneme the shift of size 1 is used.
+        To create as many features for the specified phoneme the shift of size 1 is used.
         Finally, a cut chunk is saved to the storage.
 
         :param phoneme_features: phoneme feature in this particular case mel frequencies
@@ -219,9 +117,9 @@ class TFStorage(object):
         for i in range(numChunks):
             chunk = phoneme_features[i:i + chunkLength, :]
             # shape check
-            if np.shape(chunk) != (config.SPECTROGRAM_CHUNK_LENGTH, config.NUM_MEL_FREQ_COMPONENTS):
+            if np.shape(chunk) != (config.FEATURES_CHUNK_LENGTH, config.NUM_MEL_FREQ_COMPONENTS):
                 raise ValueError('The chunk has incorrect shape' + str(np.shape(chunk)) + ' where expected' + '('
-                                 + str(config.SPECTROGRAM_CHUNK_LENGTH) + ',' + str(config.NUM_MEL_FREQ_COMPONENTS) + ')')
+                                 + str(config.FEATURES_CHUNK_LENGTH) + ',' + str(config.NUM_MEL_FREQ_COMPONENTS) + ')')
             if not isinstance(chunk[0][0], np.float32):
                 raise ValueError('The chunk values has incorrect type: ' + str(type(chunk[0][0])) + ' where expected: '
                                  + str(np.float32))
@@ -232,3 +130,88 @@ class TFStorage(object):
             if self.maximumNumberOfRows is not None and self.maximumNumberOfRows == self.currentNumberOfRows:
                 print "Added: " + str(self.currentNumberOfRows) + " rows"
                 sys.exit(0)
+
+    # Reader
+    def _read_one_example(self):
+        """
+        Reads one example (one row) from a storage.
+
+        :return:
+            features vector: a vector of features of size config.CHUNK_VECTOR_SIZE. Features are mfccs
+            phoneme: phoneme
+            speaker: speaker
+        """
+        _, serialized_example = self.reader.read(self.filename_queue)
+
+        features = tf.parse_single_example(
+            serialized_example,
+            features={
+                'phoneme': tf.FixedLenFeature([], tf.int64),
+                'speaker': tf.FixedLenFeature([], tf.int64),
+                'spectrum_raw': tf.FixedLenFeature([], tf.string),
+            })
+
+        features_raw = tf.decode_raw(features['spectrum_raw'], tf.float32)
+        features_raw.set_shape([config.CHUNK_VECTOR_SIZE])
+        phoneme = tf.cast(features['phoneme'], tf.int64)
+        speaker = tf.cast(features['speaker'], tf.int64)
+
+        return features_raw, phoneme, speaker
+
+    def inputs(self, batch_size, shuffle=True):
+        """
+        Construct input for EVA evaluation using the Reader ops.
+
+        :param batch_size: Number of examples per batch.
+        :return:
+            features_batch: Sound features. 4D tensor of [batch_size, config.CHUNK_SHAPE] size.
+            phoneme_batch: A batch of phonemes. 1D tensor of [batch_size] size.
+            speaker_batch: A batch of speakers. 1D tensor of [batch_size] size.
+        """
+        features, phoneme, speaker = self._read_one_example()
+        # Set the shapes of tensors.
+        features = tf.reshape(features, config.CHUNK_SHAPE)
+
+        # Ensure that the random shuffling has good mixing properties.
+        min_fraction_of_examples_in_queue = 0.1
+        min_queue_examples = int(config.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN * min_fraction_of_examples_in_queue)
+
+        # Generate a batch of images and labels by building up a queue of examples.
+        return self._generate_image_and_label_batch(features, phoneme, speaker,
+                                                    min_queue_examples, batch_size,
+                                                    shuffle=shuffle)
+
+    def _generate_image_and_label_batch(self, features, phoneme, speaker, min_queue_examples, batch_size, shuffle):
+        """Construct a queued batch of features and labels.
+
+        :param features: 4D Tensor of [batch_size, config.CHUNK_SHAPE] of type.float32.
+        :param phoneme: 1D Tensor of type.int32 of phonemes
+        :param speaker: 1D Tensor of type.int32 of speakers
+        :param min_queue_examples: int32, minimum number of samples to retain
+            in the queue that provides of batches of examples.
+        :param batch_size: Number of examples per batch.
+        :param shuffle: boolean indicating whether to use a shuffling queue.
+        :return:
+            features_batch: Sound features. 4D tensor of [batch_size, config.CHUNK_SHAPE] size.
+            phoneme_batch: A batch of phonemes. 1D tensor of [batch_size] size.
+            speaker_batch: A batch of speakers. 1D tensor of [batch_size] size.
+        """
+
+        # Create a queue that shuffles the examples, and then
+        # read 'batch_size' features, phoneme and speaker from the example queue.
+        if shuffle:
+            features_batch, phoneme_batch, speaker_batch = tf.train.shuffle_batch(
+                [features, phoneme, speaker],
+                batch_size=batch_size,
+                capacity=min_queue_examples + 3 * batch_size,
+                min_after_dequeue=int(min_queue_examples * 0.1))
+        else:
+            features_batch, phoneme_batch, speaker_batch = tf.train.batch(
+                [features, phoneme, speaker],
+                batch_size=batch_size,
+                capacity=min_queue_examples + 3 * batch_size)
+
+        # Display the training images in the visualizer.
+        # tf.summary.image('spectrograms', spectrograms)
+
+        return features_batch, tf.reshape(phoneme_batch, [batch_size]), tf.reshape(phoneme_batch, [speaker_batch])

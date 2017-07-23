@@ -103,15 +103,15 @@ def eval_once(saver, summary_writer, top_k_op, summary_op):
 def evaluate():
   """Eval CIFAR-10 for a number of steps."""
   with tf.Graph().as_default() as g, TFStorage(config.TEST_DATESET_FILE_PATH(), TFStorageOpenOptions.READ) as storage:
-    # Get images and labels for CIFAR-10.
-    soundFeatures, labels = storage.inputs(TFStorageLabelOption.SPEAKER, config.BATCH_SIZE, shuffle=False)
+    # Gets sound features, phoneme and speakers
+    sound_features, phonemes, speakers = storage.inputs(config.BATCH_SIZE, shuffle=False)
 
     # Build a Graph that computes the logits predictions from the
     # inference model.
-    logits = eva.inference(soundFeatures)
+    logits = eva.inference(sound_features)
 
     # Calculate predictions.
-    top_k_op = tf.nn.in_top_k(logits, labels, 1)
+    top_k_op = tf.nn.in_top_k(logits, speakers, 1)
 
     # Restore the moving average version of the learned variables for eval.
     variable_averages = tf.train.ExponentialMovingAverage(

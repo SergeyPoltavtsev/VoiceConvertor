@@ -11,8 +11,8 @@ class EvaTest(tf.test.TestCase):
     def _generate_row(self):
         phoneme = random.choice(config.TOTAL_TIMIT_PHONEME_LIST)
         speaker = "speaker" + str(random.randint(0, 9))
-        spectrogram_chunk = np.random.rand(config.SPECTROGRAM_HEIGHT, config.SPECTROGRAM_CHUNK_LENGTH,
-                                           config.SPECTROGRAM_DEPTH)
+        spectrogram_chunk = np.random.rand(config.NUM_MEL_FREQ_COMPONENTS, config.FEATURES_CHUNK_LENGTH,
+                                           config.NUM_MEL_FREQ_COMPONENTS)
         row = (spectrogram_chunk, phoneme, speaker)
         return row
 

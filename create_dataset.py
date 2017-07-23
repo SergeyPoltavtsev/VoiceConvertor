@@ -69,8 +69,8 @@ def create_dataset(path_to_TIMIT, storage_path, number_of_examples=None):
                                                          thresh=config.SPEC_THRESH)
                 # create mels out of spectrogram
                 phone_mfcc = make_mel(phoneme_spectrogram, mel_filter, shorten_factor=1)
-                storage.cut_phoneme_into_chunks_and_save(phone_mfcc, config.SPECTROGRAM_CHUNK_LENGTH,
-                                                    phoneme[2], speaker)
+                storage.cut_phoneme_into_chunks_and_save(phone_mfcc, config.FEATURES_CHUNK_LENGTH,
+                                                         phoneme[2], speaker)
 
         print "Added: " + str(storage.currentNumberOfRows) + " rows"
 

@@ -45,15 +45,15 @@ def train():
         #global_step = tf.contrib.framework.get_or_create_global_step()
         global_step = tf.Variable(0, name='global_step', trainable=False)
 
-        # Get spectrograms and labels for EVA.
-        spectrograms, labels = storage.inputs(TFStorageLabelOption.SPEAKER, config.BATCH_SIZE, shuffle=True)
+        # Get sound features and phonemes and speakers for EVA.
+        sound_features, phonemes, speakers = storage.inputs(config.BATCH_SIZE, shuffle=True)
 
         # Build a Graph that computes the logits predictions from the
         # inference model.
-        logits = eva.inference(spectrograms, train=True)
+        logits = eva.inference(sound_features, train=True)
 
         # Calculate loss.
-        loss = eva.loss(logits, labels)
+        loss = eva.loss(logits, speakers)
 
         # Build a Graph that trains the model with one batch of examples and
         # updates the model parameters.

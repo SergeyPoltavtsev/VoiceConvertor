@@ -203,7 +203,7 @@ def inference(spectograms, train=False):
     | dropout   |                   |
     | FC3       | Speaker / Phoneme |
 
-    :param spectograms: Spectrograms of size [config.SPECTROGRAM_HEIGHT x config.SPECTROGRAM_CHUNK_LENGTH x 2], which
+    :param spectograms: Spectrograms of size [config.NUM_MEL_FREQ_COMPONENTS x config.FEATURES_CHUNK_LENGTH x 2], which
         are obtained from inputs().
     :return: Logits
     """
