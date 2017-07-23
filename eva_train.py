@@ -35,12 +35,15 @@ tf.app.flags.DEFINE_integer('max_steps', 50000,
                             """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False,
                             """Whether to log device placement.""")
+tf.app.flags.DEFINE_boolean('save_checkpoint_secs', 600,
+                            """The frequency, in seconds, that a checkpoint is saved.""")
 
 
 def train():
     """Train EVA for a number of steps."""
     with tf.Graph().as_default(), TFStorage(config.DATESET_FILE_PATH(), TFStorageOpenOptions.READ) as storage:
-        global_step = tf.contrib.framework.get_or_create_global_step()
+        #global_step = tf.contrib.framework.get_or_create_global_step()
+        global_step = tf.Variable(0, name='global_step', trainable=False)
 
         # Get spectrograms and labels for EVA.
         spectrograms, labels = storage.inputs(TFStorageLabelOption.SPEAKER, config.BATCH_SIZE, shuffle=True)
@@ -85,14 +88,20 @@ def train():
 
         with tf.train.MonitoredTrainingSession(
                 checkpoint_dir=FLAGS.train_dir,
+                save_checkpoint_secs=FLAGS.save_checkpoint_secs,
                 hooks=[tf.train.StopAtStepHook(last_step=FLAGS.max_steps),
                        tf.train.NanTensorHook(loss),
                        _LoggerHook()],
                 config=tf.ConfigProto(
                     log_device_placement=FLAGS.log_device_placement)) as mon_sess:
 
-            # Require for getting an input batch from the storage
-            mon_sess.run(init)
+            ckpt = tf.train.get_checkpoint_state(FLAGS.train_dir)
+            if ckpt and ckpt.model_checkpoint_path:
+                print('Model was restored')
+            else:
+                mon_sess.run(init)
+
+            # Required for getting an input batch from the storage
             tf.train.start_queue_runners(sess=mon_sess)
 
             while not mon_sess.should_stop():
@@ -100,8 +109,8 @@ def train():
 
 
 def main(argv=None):  # pylint: disable=unused-argument
-    if tf.gfile.Exists(FLAGS.train_dir):
-        tf.gfile.DeleteRecursively(FLAGS.train_dir)
+    #if tf.gfile.Exists(FLAGS.train_dir):
+    #   tf.gfile.DeleteRecursively(FLAGS.train_dir)
     tf.gfile.MakeDirs(FLAGS.train_dir)
     train()
 
