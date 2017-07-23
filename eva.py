@@ -28,7 +28,7 @@ tf.app.flags.DEFINE_integer('batch_size', config.BATCH_SIZE,
 tf.app.flags.DEFINE_string('storage_path', config.DATESET_FILE_PATH(),
                            """Path to the CIFAR-10 data directory.""")
 
-# Global constants describing the CIFAR-10 data set.
+# Global constants describing the Eva data set.
 NUM_CLASSES = config.NUM_SPEAKER_CLASSES
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = config.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = config.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL

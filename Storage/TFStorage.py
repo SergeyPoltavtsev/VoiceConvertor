@@ -214,4 +214,4 @@ class TFStorage(object):
         # Display the training images in the visualizer.
         # tf.summary.image('spectrograms', spectrograms)
 
-        return features_batch, tf.reshape(phoneme_batch, [batch_size]), tf.reshape(phoneme_batch, [speaker_batch])
+        return features_batch, tf.reshape(phoneme_batch, [batch_size]), tf.reshape(speaker_batch, [batch_size])
